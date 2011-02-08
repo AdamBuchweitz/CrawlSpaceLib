@@ -60,19 +60,41 @@ local referencePoints = function( obj, point )
         return false
     end
 end
-            --########## Group Override ##########--
+
+            --[[ ########## newGroup Override  ########## ]--
+
+At long last you may insert multiple objects into a group with
+a single line! There is no syntax change, and you may still insert
+object when instantiating the group.
+
+:: EXAMPLE 1 ::
+
+    local myGroup = display.newGroup()
+    myGroup:insert(myImage, myRect, myRoundRect, myImageRect)
+
+:: EXAMPLE 2 ::
+
+    local myGroup = display.newGroup(firstObject, secondObject)
+    myGroup:insert(thirdObject, forthObject)
+
+:: EXAMPLE 3 ::
+
+    local myGroup = display.newGroup()
+    myGroup:insert( 1, myObject, mySecondObject) -- inserting all objects at position 1
+
+:: EXAMPLE 4 ::
+
+    local myGroup = display.newGroup()
+    myGroup:insert( myObject, mySecondObject, true) -- resetTransform still works too!
+
+]]
+
 local crawlspaceInsert = function(...)
     local t = {...}
     local b, reset = 0, nil
     if type(t[#t]) == "boolean" then b = 1; reset = t[#t] end
-    if type(t[2]) == "number" then
-        for i=3, #t-b do
-            t[1]:cachedInsert(t[2],t[i],reset)
-        end
-    else
-        for i=2, #t-b do
-            t[1]:cachedInsert(t[i],reset)
-        end
+    if type(t[2]) == "number" then for i=3, #t-b do t[1]:cachedInsert(t[2],t[i],reset) end
+    else for i=2, #t-b do t[1]:cachedInsert(t[i],reset) end
     end
 end
 local cachedNewGroup = display.newGroup
@@ -80,52 +102,93 @@ crawlspaceNewGroup = function(...)
     local g = cachedNewGroup(...)
     g.cachedInsert = g.insert
     g.insert = crawlspaceInsert
-    --g.x, g.y = screenX, screenY
     displayMethods( g )
     return g
 end
 display.newGroup = crawlspaceNewGroup
 
-            --########## NewRectOverride ##########--
+            --[[ ########## NewRect Override  ########## ]--
+
+As with all display objects, you may append a string argument to set
+it's reference point.
+
+:: EXAMPLE 1 ::
+
+    display.newRect(0, 0, 100, 50 [, "tl"])
+
+]]
+
 local cachedNewRect = display.newRect
 crawlspaceNewRect= function( x, y, w, h, rp )
     local r = cachedNewRect( x, y, w, h )
-    if referencePoints( r, rp ) then
-        displayMethods( r )
-    end
+    if referencePoints( r, rp ) then displayMethods( r ) end
     return r
 end
 display.newRect= crawlspaceNewRect
 
-            --########## NewRoundRectOverride ##########--
+            --[[ ########## NewRoundRect Override  ########## ]--
+
+As with all display objects, you may append a string argument to set
+it's reference point.
+
+:: EXAMPLE 1 ::
+
+    display.newRoundRect( 0, 0, 100, 50, 10 [, "tl"])
+
+]]
+
 local cachedNewRoundRect = display.newRoundRect
 crawlspaceNewRoundRect= function( x, y, w, h, r, rp )
     local r = cachedNewRoundRect( x, x, w, h, r )
-    if referencePoints( r, rp ) then
-        displayMethods( r )
-    end
+    if referencePoints( r, rp ) then displayMethods( r ) end
     return r
 end
 display.newRoundRect= crawlspaceNewRoundRect
 
-            --########## NewImageOverride ##########--
+            --[[ ########## NewImage Override  ########## ]--
+
+The enhancement to newImage is that if you omit the x and y,
+they will be set to the dynamic rasolution values for 0, 0.
+
+As with all display objects, you may append a string argument to set
+it's reference point.
+
+:: EXAMPLE 1 ::
+
+    display.newImage("myImage.png" [, 100, 50, "tl"])
+
+]]
+
 local cachedNewImage = display.newImage
 crawlspaceNewImage= function( path, x, y, rp )
     local i = cachedNewImage( path, x or screenX, y or screenY )
-    if referencePoints( i, rp ) then
-        displayMethods( i )
-    end
+    if referencePoints( i, rp ) then displayMethods( i ) end
     return i
 end
 display.newImage= crawlspaceNewImage
 
-            --########## NewImageRect Override ##########--
+            --[[ ########## NewImageRect Override  ########## ]--
+
+Enhanced newImageRect has the option to omit the width and height.
+They wil be defaulted to the "magic" sizes of 380 wide by 570 tall.
+
+As with all display objects, you may append a string argument to set
+it's reference point.
+
+:: EXAMPLE 1 ::
+
+    display.newImageRect("myImage.png" [, 100, 50, "tl"])
+
+:: EXAMPLE 2 ::
+
+    display.newImageRect("myImage.png")
+
+]]
+
 local cachedNewImageRect = display.newImageRect
 crawlspaceNewImageRect = function( path, w, h, rp )
     local i = cachedNewImageRect( path, w or 380, h or 570 )
-    if referencePoints( i, rp ) then
-        displayMethods( i )
-    end
+    if referencePoints( i, rp ) then displayMethods( i ) end
     return i
 end
 display.newImageRect = crawlspaceNewImageRect
