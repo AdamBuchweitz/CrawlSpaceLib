@@ -1,18 +1,9 @@
 module(..., package.seeall)
+local audio  = require "audio"
 
 -- Set this to false to bypass the welcome message
-local intro = true
-intro = false
-
-local audio  = require "audio"
-local mCeil  = math.ceil
-local mAtan2 = math.atan2
-local mPi    = math.pi
-local mSqrt  = math.sqrt
-
-_G.initFont = function( fontName, globalName )
-    _G[globalName] = fontName
-end
+local showIntro = true
+showIntro = false
 
             --########## Global Screen Dimensions ##########--
 local centerX, centerY = display.contentCenterX, display.contentCenterY
@@ -28,7 +19,96 @@ _G.scale, _G.suffix = scale, suffix
 
 if system.getInfo("environment") == "simulator" then _G.simulator = true end
 
-            --########## Reference Point Shorthand ##########--
+            --[[ ########## Saving and Loading ########## ]--
+
+This bit has been mostly barrowed from the Ansca documentation,
+we simply made it easier to use.
+
+You keep one table of information, with as many properties
+as you like. Simply pass this table into to Save() and it
+will be taken care of. To load it, just call Load() which
+returns the table.
+
+
+:: SAVING EXAMPLE ::
+
+    local myData     = {}
+    myData.bestScore = 500
+    myData.volume    = .8
+
+    Save(myData)
+
+:: LOADING EXAMPLE ::
+
+    local myData = Load()
+    print(myData.bestScore) <== 500
+    print(myData.volume)    <== .8
+
+]]
+
+local split = function(str, pat)
+    local t = {}
+    local fpat = "(.-)" .. pat
+    local last_end = 1
+    local s, e, cap = str:find(fpat, 1)
+    while s do
+        if s ~= 1 or cap ~= "" then table.insert(t,cap) end
+        last_end = e+1
+        s, e, cap = str:find(fpat, last_end)
+    end
+    if last_end <= #str then
+        cap = str:sub(last_end)
+        table.insert(t,cap)
+    end
+    return t  
+end
+
+local saveData = function(table, fileName)
+    local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
+    local file = io.open( filePath, "w" )
+
+    for k,v in pairs( table ) do
+        file:write( k .. "=" .. tostring(v) .. "," )
+    end
+
+    io.close( file )
+end
+_G.Save = saveData
+
+local loadData = function(fileName)
+    local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
+    local file = io.open( filePath, "r" )
+
+    if file then
+        local dataStr = file:read( "*a" )
+        local datavars = split(dataStr, ",")
+        dataTableNew = {}
+
+        for i = 1, #datavars do
+            local onevalue = split(datavars[i], "=")
+            dataTableNew[onevalue[1]] = onevalue[2]
+        end
+
+        io.close( file ) -- important!
+        return dataTableNew
+    else
+        print("Hey, ya gotta create the file first. Try using: Save(yourTable)")
+        return false
+    end
+end
+_G.Load = loadData
+
+            --[[ ########## Reference Point Shorthand ########## ]--
+
+All this block does it set shorthand notations for all reference points.
+The main purpose of this is for passing short values into display objects.
+
+:: EXAMPLE 1 ::
+
+    myObject:setReferencePoint(display.tl)
+
+]]
+
 display.tl = display.TopLeftReferencePoint
 display.tc = display.TopCenterReferencePoint
 display.tr = display.TopRightReferencePoint
@@ -239,33 +319,6 @@ crawlspaceNewImageRect = function( path, w, h, rp )
 end
 display.newImageRect = crawlspaceNewImageRect
 
-            --########## Timer override ##########--
-local timerArray = {}
-local cachedTimer = timer.performWithDelay
-timerWithTracking = function( time, callback, repeats, add )
-    local repeats, add = repeats, add
-    if type(repeats) == "boolean" then add = repeats; repeats = nil end
-    local t = cachedTimer(time, callback, repeats)
-    if add ~= false then
-        timerArray[#timerArray+1] = t
-    end
-    return t
-end
-
-local cancelAllTimers = function()
-    for i=1, #timerArray do
-        timer.cancel(timerArray[i])
-    end
-end
-timer.cancelAll = cancelAllTimers
-timer.performWithDelay = timerWithTracking
-
-local cachedTimerCancel = timer.cancel
-local safeCancel = function(t)
-    if t then cachedTimerCancel(t) else print("Whoops, that timer doesn't exist!") end
-end
-timer.cancel = safeCancel
-
             --[[ ########## Auto Retina Text ########## ]--
 
 This feature doesn't require much explanation. It overrides the default
@@ -291,6 +344,156 @@ local crawlspaceNewText = function( text, xPos, yPos, font, size, rp )
     return t
 end
 display.newText = crawlspaceNewText
+
+            --[[ ########## New Paragraphs ########## ]--
+
+Making paragraphs is now pretty easy. You can call the paragraph
+by itself, passing in the text size as the last parameter, or you
+can apply various formatting properties. Right now the list of
+available properties are:
+
+font       = myCustomFont
+lineHeight = 1.4
+align      = ["left", "right", "center"]
+textColor  = 255, 0, 0
+
+The method returns a group, which cannot be directly editted (yet),
+but can be handled like any other group. You may position it,
+transition it, insert it into another group, etc.
+
+:: USAGE ::
+
+    display.newParagraph( text, charactersPerLine, size or parameters )
+
+:: EXAMPLE 1 ::
+
+    local format = {}
+    format.font = flyer
+    format.size = 36
+    format.lineHeight = 2
+    format.align = "center"
+
+    local myParagraph = display.newParagraph( "Welcome to the Crawl Space Library!", 15, format)
+    myParagraph:center("x")
+    myParagraph:fadeIn()
+
+:: EXAMPLE 2 ::
+
+    local myParagraph = display.newParagraph( "I don't care about formatting this paragraph, just place it", 20, 24 )
+
+]]
+
+local textAlignments = {left="cl",right="cr",center="c",centered="c",middle="c"}
+display.newParagraph = function( string, width, params )
+    local format; if type(params) == "number" then format={size = params} else format=params end
+    local splitString, lineCache, tempString = split(string, " "), {}, ""
+    for i=1, #splitString do
+        if #tempString + #splitString[i] > width then lineCache[#lineCache+1]=tempString; tempString=splitString[i].." "
+        else tempString = tempString..splitString[i].." " end
+    end
+    lineCache[#lineCache+1]=tempString
+    local g, align = display.newGroup(), textAlignments[format.align or "left"]
+    for i=1, #lineCache do
+        local t=display.newText(lineCache[i],0,( format.size * ( format.lineHeight or 1 ) ) * i,format.font, format.size, align); if format.textColor then t:setTextColor(format.textColor[1],format.textColor[2],format.textColor[3]) end g:insert(t)
+    end
+    return g
+end
+
+            --[[ ########## Timer Hijack ########## ]--
+
+This override is here to snag every timer and cache it into
+an array for later cancelling. There is no change in syntax,
+none of your code will break.
+
+Sometimes you will want to cancel all timers EXCEPT a few,
+in which case simply pass in "false" when you creat your timer.
+
+:: EXAMPLE 1 ::
+
+    local myFunction = function()
+        print("my function")  <== This will never print
+    end
+
+    timer.performWithDelay(5000, myFunction)
+
+    timer.cancelAll()
+
+:: EXAMPLE 2 ::
+
+    local myFunction = function()
+        print("my function")  <== This will never print
+    end
+
+    local mySecondFunction = function()
+        print("my second function") <== This will print!
+    end
+
+    timer.performWithDelay(5000, myFunction)
+    timer.performWithDelay(5000, mySecondFunction, false)
+
+    timer.cancelAll()
+
+:: EXAMPLE 3 ::
+
+    local seconds = 0
+    local count = function()
+        seconds = seconds + 1
+        print(seconds)
+    end
+
+    myTimer = timer.performWithDelay(1000, count, 0, false) -- You may still use the repeat counter
+
+    timer.cancelAll()
+
+]]
+
+local timerArray = {}
+local cachedTimer = timer.performWithDelay
+timerWithTracking = function( time, callback, repeats, add )
+    local repeats, add = repeats, add
+    if type(repeats) == "boolean" then add = repeats; repeats = nil end
+    local t = cachedTimer(time, callback, repeats)
+    if add ~= false then
+        timerArray[#timerArray+1] = t
+    end
+    return t
+end
+
+local cancelAllTimers = function()
+    for i=1, #timerArray do
+        timer.cancel(timerArray[i])
+    end
+end
+timer.cancelAll = cancelAllTimers
+timer.performWithDelay = timerWithTracking
+
+            --[[ ########## Safe Timer Cancel ########## ]--
+
+There will inevitably come a time when you write something like:
+
+    if myTimer then timer.cancel(myTimer) end
+
+Instead of wasting time thinking about if the timer exists yet,
+just cancel it like normal. If is doesn't exist, you will receive
+a kind warning letting you know, but there be no error
+
+:: EXAMPLE 1 ::
+
+    local myTimer
+
+    timer.cancel(myTimer) -- Even though the timer does not yet exist, there will be no error
+
+    myTimer = timer.performWithDelay(10000, myFunction)
+
+    timer.cancel(myTimer) -- It will now cancel like normal
+
+]]
+
+local cachedTimerCancel = timer.cancel
+local safeCancel = function(t)
+    if t then cachedTimerCancel(t) else print("Whoops, that timer doesn't exist!") end
+end
+timer.cancel = safeCancel
 
             --########## Crossfade Background ##########--
 local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
@@ -369,9 +572,22 @@ _G.printFonts = function()
     for k,v in pairs(fonts) do print(v) end
 end
 
---==================== End CoronaSDK Hijacks ====================--
+            --[[ ########## Easy Global Font ########## ]--
 
---==================== Begin CrawlSpace Nicities  ====================--
+There really isn't anything to this function, it just sets a global
+variable to whatever name you want the font to be. It just keeps the
+mind clear.
+
+:: EXAMPLE 1 ::
+
+    initFont("FlyerLT-BlackCondensed", "flyer")
+
+    display.newText("This will be written in Flyer!", 0, 0, flyer, 36)
+
+]]
+
+_G.initFont = function( fontName, globalName ) _G[globalName] = fontName end
+
 
 local registeredVariables = {}
 registerVariable = function(...)
@@ -412,86 +628,9 @@ adjustVariable = function(...)
         end
     end
 end
+_G.setVar = adjustVariable
 
 
-            --[[ ########## Saving and Loading ########## ]--
-
-This bit has been mostly barrowed from the Ansca documentation,
-we simply made it easier to use.
-
-You keep one table of information, with as many properties
-as you like. Simply pass this table into to Save() and it
-will be taken care of. To load it, just call Load() which
-returns the table.
-
-
-:: SAVING EXAMPLE ::
-
-    local myData     = {}
-    myData.bestScore = 500
-    myData.volume    = .8
-
-    Save(myData)
-
-:: LOADING EXAMPLE ::
-
-    local myData = Load()
-    print(myData.bestScore) <== 500
-    print(myData.volume)    <== .8
-
-]]
-
-local split = function(str, pat)
-    local t = {}
-    local fpat = "(.-)" .. pat
-    local last_end = 1
-    local s, e, cap = str:find(fpat, 1)
-    while s do
-        if s ~= 1 or cap ~= "" then table.insert(t,cap) end
-        last_end = e+1
-        s, e, cap = str:find(fpat, last_end)
-    end
-    if last_end <= #str then
-        cap = str:sub(last_end)
-        table.insert(t,cap)
-    end
-    return t  
-end
-
-local saveData = function(table, fileName)
-    local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
-    local file = io.open( filePath, "w" )
-
-    for k,v in pairs( table ) do
-        file:write( k .. "=" .. tostring(v) .. "," )
-    end
-
-    io.close( file )
-end
-_G.Save = saveData
-
-local loadData = function(fileName)
-    local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
-    local file = io.open( filePath, "r" )
-
-    if file then
-        local dataStr = file:read( "*a" )
-        local datavars = split(dataStr, ",")
-        dataTableNew = {}
-
-        for i = 1, #datavars do
-            local onevalue = split(datavars[i], "=")
-            dataTableNew[onevalue[1]] = onevalue[2]
-        end
-
-        io.close( file ) -- important!
-        return dataTableNew
-    else
-        print("Hey, ya gotta create the file first. Try using: Save(yourTable)")
-        return false
-    end
-end
-_G.Load = loadData
 
 
             --[[ ########## Execute If Internet ########## ]--
@@ -606,28 +745,4 @@ local showTip = function()
     print("A tasty treat goes here!")
 end
 
-if intro then welcome() elseif startupTips then showtip() end
-
-local textAlignments = {left="cl",right="cr",center="c",centered="c",middle="c"}
-display.newParagraph = function( string, width, format )
-
-    local splitString, lineCache, tempString = split(string, " "), {}, ""
-
-    for i=1, #splitString do
-        if #tempString + #splitString[i] > width then
-            lineCache[#lineCache+1]=tempString
-            tempString=splitString[i].." "
-        else
-            tempString = tempString..splitString[i].." "
-        end
-    end
-    lineCache[#lineCache+1]=tempString
-    local g = display.newGroup()
-    local align = textAlignments[format.align or "left"]
-    for i=1, #lineCache do
-        local t=display.newText(lineCache[i],0,( format.size * ( format.lineHeight or 1 ) ) * i,format.font, format.size, align); t:setTextColor(format.textColor[1],format.textColor[2],format.textColor[3])
-        g:insert(t)
-    end
-    return g
-end
-
+if showIntro then welcome() elseif startupTips then showtip() end
