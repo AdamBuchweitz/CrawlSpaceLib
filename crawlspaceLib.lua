@@ -2,6 +2,7 @@ module(..., package.seeall)
 
 -- Set this to false to bypass the welcome message
 local intro = true
+intro = false
 
 local audio  = require "audio"
 local mCeil  = math.ceil
@@ -587,7 +588,7 @@ local extendedPrint = function( ... )
         end
     end
 end
---_G.print = extendedPrint
+_G.print = extendedPrint
 
 local welcome = function()
     local print = cachedPrint
@@ -596,10 +597,9 @@ local welcome = function()
     print("Welcome to the CrawlSpace Library!\n\n\tA lot of work has gone into making this very powerful while also keeping it very, very easy to use.")
     print("\n\n")
 
-    print(scale)
     local device=""; if scale==.5 then device="@2x" elseif scale<.5 then device="@iPad" end
-    local lsntr = function ( event ) if not event.isError then local t=event.target; t:fadeIn(); t.timer=function()t:fadeOut(500,true)end; timer.performWithDelay(2000, t) end end
-    display.loadRemoteImage( "http://crawlspacegames.com/images/splash"..device..".png", "GET", lsntr, "splash.png", system.TemporaryDirectory, screenWidth/scale, screenHeight/scale )
+    local lsntr = function ( event ) if not event.isError then local t=event.target; t.xScale,t.yScale=scale,scale; t.x,t.y=centerX,centerY; t:fadeIn(); t.timer=function()t:fadeOut(500,true)end; timer.performWithDelay(2000, t) end end
+    display.loadRemoteImage( "http://crawlspacegames.com/images/splash"..device..".png", "GET", lsntr, "splash"..device..".png", system.TemporaryDirectory )
 end
 
 local showTip = function()
@@ -607,3 +607,27 @@ local showTip = function()
 end
 
 if intro then welcome() elseif startupTips then showtip() end
+
+local textAlignments = {left="cl",right="cr",center="c",centered="c",middle="c"}
+display.newParagraph = function( string, width, format )
+
+    local splitString, lineCache, tempString = split(string, " "), {}, ""
+
+    for i=1, #splitString do
+        if #tempString + #splitString[i] > width then
+            lineCache[#lineCache+1]=tempString
+            tempString=splitString[i].." "
+        else
+            tempString = tempString..splitString[i].." "
+        end
+    end
+    lineCache[#lineCache+1]=tempString
+    local g = display.newGroup()
+    local align = textAlignments[format.align or "left"]
+    for i=1, #lineCache do
+        local t=display.newText(lineCache[i],0,( format.size * ( format.lineHeight or 1 ) ) * i,format.font, format.size, align); t:setTextColor(format.textColor[1],format.textColor[2],format.textColor[3])
+        g:insert(t)
+    end
+    return g
+end
+
