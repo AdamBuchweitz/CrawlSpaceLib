@@ -2,17 +2,45 @@ module(..., package.seeall)
 local audio  = require "audio"
 
 -- Set this to false to bypass the welcome message
-local showIntro = true
-showIntro = false
+local showIntro = false
 
-            --########## Global Screen Dimensions ##########--
+-- Set this to false to bypass the random Lua/CoronaSDK tips
+local showTip = true
+
+            --[[ ########## Global Screen Dimensions ########## ]--
+
+Use these global variables to position your elements. They are dynamic
+to all resolutions. Android devices are usually taller, so use screenY to
+set the position where you expect 0 to be. The iPad is wider than iPhones,
+so use screenY. Also the width and height need to factor these differences
+in as well, so use screenWidth and screenHeight. Lastly, centerX and cetnerY
+are simply global remaps of display.contentCenterX and Y.
+
+:: USAGE ::
+
+    myObject.x, myObject.y = screenX + 10, screenY + 10 -- Position 10 pixels from the top left corner on all devices
+
+    display.newText("centered text", centerX, centerY, 36) -- Center the text
+
+    display.newRect(screenX, screenY, screenWidth, screenHeight) -- Cover the screen, no matter what size
+
+]]
 local centerX, centerY = display.contentCenterX, display.contentCenterY
 local screenX, screenY = display.screenOriginX, display.screenOriginY
 local screenWidth, screenHeight = display.contentWidth - screenX * 2, display.contentHeight - screenY * 2
 _G.centerX, _G.centerY, _G.screenX, _G.screenY, _G.screenWidth, _G.screenHeight = centerX, centerY, screenX, screenY, screenWidth, screenHeight
 display.contentWidth, display.contentHeight = screenWidth, screenHeight
 
-            --########## Global Content Scale and Suffix ##########--
+            --[[ ########## Global Content Scale and Suffix  ########## ]--
+
+Checks the content scaling and sets a global var "scale". In addition,
+if you use sprite sheets and was retina support, append the global "suffix"
+variable when calling your datasheet, and it will pull the hi-res version
+when it's needed. On the topic of devices and scals, when in the simulator,
+the global variable "simulator" is set to true.
+
+]]
+
 local scale, suffix = display.contentScaleX, ""
 if scale < 1 then suffix = "@2x" end
 _G.scale, _G.suffix = scale, suffix
@@ -394,6 +422,7 @@ display.newParagraph = function( string, width, params )
     lineCache[#lineCache+1]=tempString
     local g, align = display.newGroup(), textAlignments[format.align or "left"]
     for i=1, #lineCache do
+        g.text=(g.text or "")..lineCache[i]
         local t=display.newText(lineCache[i],0,( format.size * ( format.lineHeight or 1 ) ) * i,format.font, format.size, align); if format.textColor then t:setTextColor(format.textColor[1],format.textColor[2],format.textColor[3]) end g:insert(t)
     end
     return g
@@ -495,21 +524,36 @@ local safeCancel = function(t)
 end
 timer.cancel = safeCancel
 
-            --########## Crossfade Background ##########--
+            --[[ ########## Crossfade Background Music ########## ]--
+
+Crossfading your background music gives your games a lot more polish. Using
+the Crawl Space Library, this is easy! The first two audio channels are
+reserved automatically, and when you call the method it keeps track of
+which one is not in use for the next crossfade. You should even call this
+method for the first play of the background music.
+
+The Crawl Space Library also registers a variable called "volume", and that
+is where the cross fader gets the start / end points. So if your app has
+a slider that changes the volume, do not forget to change the volume variable!
+
+:: EXAMPLE 1 ::
+
+    audio.crossFadeBackground("myBackgroundMusic")
+
+:: EXAMPLE 2 ::
+
+    setVar{"volume", .5, true}
+    audio.crossFadeBackground("myBackgroundMusic")
+]]
+
 local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
 local crossFadeBackground = function( path )
     local musicPath = path or retrieveVariable("musicPath")
-    
-    -- if the song is the same as what's already playing, don't restart it
     if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
-    -- fades the current background audio channel and stops
     audio.fadeOut({channel=audioChannel, time=500})
-    -- switches to the free background audio channel
     if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
     audio.setVolume( retrieveVariable("volume"), {audioChannel})
-    -- loads the stream
     curAudio = audio.loadStream( musicPath )
-    -- fades in the new music on the new channel
     audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
     prevAudio = curAudio
     currentSong = musicPath
@@ -519,14 +563,37 @@ audio.reserveChannels(2)
 audio.currentBackgroundChannel = 1
 audio.crossFadeBackground = crossFadeBackground
 
-            --########## Easy SFX ##########--
+            --[[ ########## True or False SFX ########## ]--
+
+Your game probably will have a toggle to turn on and off sound effect,
+but it's a major pain to check the variable everytime you want to
+play one. If you, instead, adjust the auto-registered "sfx" variable,
+audio.playSFX will handle the checking for you. Additionaly, playSFX
+can handle a string or a preloaded sound. If you are playing the sounds
+often, you should still preload it.
+
+:: EXAMPLE 1 ::
+
+    audio.playSFX("sfx_tap.aac")
+
+:: EXAMPLE 2 ::
+
+    local hitSFX = audio.loadSound("sfx_hit.aac")
+    audio.playSFX( hitSFX )
+
+:: EXAMPLE 3 ::
+
+    setVar{"sfx", false}
+
+    local hitSFX = audio.loadSound("sfx_hit.aac")
+    audio.playSFX( hitSFX ) -- This will not play the sound now
+
+]]
+
 local newSFX = function( snd )
-    if retrieveVariable("sfx") == "true" then
-        if type(snd) == "string" then
-            return audio.play(audio.loadSound( snd ))
-        else
-            return audio.play(snd)
-        end
+    if retrieveVariable("sfx") == true then
+        if type(snd) == "string" then return audio.play(audio.loadSound( snd ))
+        else return audio.play(snd) end
     end
 end
 audio.playSFX = newSFX
@@ -542,6 +609,7 @@ popup. Now you won't need to build and install  to set it's position.
     native.showWebPopup( 10, 10, screenWidth - 20, screenHeight - 20, "http://crawlspacegames.com", {urlRequest=listener})
 
 ]]
+
 local cachedPopup, cachedCancelWeb, curPopup = native.showWebPopup, native.cancelWebPopup
 local safeWebPopup = function( x, y, w, h, url, params )
     if not simulator then cachedPopup(x, y, w, h, url, params)
@@ -587,51 +655,6 @@ mind clear.
 ]]
 
 _G.initFont = function( fontName, globalName ) _G[globalName] = fontName end
-
-
-local registeredVariables = {}
-registerVariable = function(...)
-    local var, var2 = ...
-    var = var2 or var
-
-    registeredVariables[var[1]] = var[2]
-end
-registerVariable{"volume", 1}
-
-registerBulk = function(...)
-    local var, var2 = ...
-    var = var2 or var
-
-    for i,v in ipairs(var[1]) do
-        registerVariable{var[1][i], var[2]}
-    end
-end
-
-retrieveVariable = function(...)
-    local name, name2 = ...
-    name = name2 or name
-
-    return registeredVariables[name]
-end
-_G.getVar = retrieveVariable
-
-adjustVariable = function(...)
-    local new, new2 = ...
-    new = new2 or new
-
-    if type(new[2]) == "string" then
-        registeredVariables[new[1]] = new[2]
-    elseif type(new[2]) == "number" then
-        registeredVariables[new[1]] = registeredVariables[new[1]] + new[2]
-        if new[3] then
-            registeredVariables[new[1]] = new[2]
-        end
-    end
-end
-_G.setVar = adjustVariable
-
-
-
 
             --[[ ########## Execute If Internet ########## ]--
 
@@ -707,24 +730,103 @@ _G.executeIfInternet = function(f)
     elseif internet == nil then toExecute[#toExecute+1] = f end
 end
 
+            --[[ ########## Global Information Handling ########## ]--
+
+Some of you may choose not to use this set of functions because global
+information is generally a bad idea. What I use this for is tracking data
+across the entire app, that may need to be changes in any one of a myriad
+different files. For me the trade off is worth it. In main.lua I register
+whatever variables I will need to track, and many of those I retrieve on
+applicationExit to save them for use on next launch. Other than saving data,
+it's very helpful to use these to keep track of a score, or a volume leve,
+whether or not to play SFX, etc.
+
+As a side note, Crawl Space Library automatically registers a variable for
+"volume" and "sfx", as these are going to be used in most projects.
+
+:: USAGE ::
+
+    registerVar{ variableName, initialValue }
+
+    registerBulk({ name1, name2, name3, name4}, initialValue)
+
+    getVar(variableName)
+
+    setVar{variableName, value [, true]}
+
+:: EXAMPLE 1 ::
+
+    registerVar{"sfx", true}
+
+    setVar{"sfx", false}
+
+    print(getVar("sfx")) <== prints false
+
+:: EXAMPLE 2 ::
+
+    registerVar{"score", 0}
+
+    setVar{"score", 1}
+    setVar{"score", 2} -- Because "score" is a number, these add rather then set
+
+    print(getVar("score")) <== prints 3
+
+    setVar{"score", 0, true} -- Setting the last argument to true makes a number set rather than add
+
+    print(getVar("score")) <== prints 0
+
+]]
+
+local registeredVariables = {}
+local registerVariable = function(...)
+    local var, var2 = ...; var = var2 or var
+    registeredVariables[var[1]] = var[2]
+end
+_G.registerVar = registerVariable
+
+local registerBulk = function(...)
+    local var, var2 = ...; var = var2 or var
+    for i,v in ipairs(var[1]) do registerVariable{var[1][i], var[2]} end
+end
+_G.registerBulk = registerBulk
+
+local retrieveVariable = function(...)
+    local name, name2 = ...; name = name2 or name
+    return registeredVariables[name]
+end
+_G.getVar = retrieveVariable
+
+local adjustVariable = function(...)
+    local new, new2 = ...; new = new2 or new
+    if type(new[2]) == "number" then
+        registeredVariables[new[1]] = registeredVariables[new[1]] + new[2]
+        if new[3] then registeredVariables[new[1]] = new[2] end
+    else registeredVariables[new[1]] = new[2] end
+end
+_G.setVar = adjustVariable
+
+registerVariable{"volume", 1}
+registerVariable{"sfx", true}
+
+            --[[ ########## Extended Print ########## ]--
+
+It's pointless to print out a table - instead you want the key/value
+pairing of the table. This extended print does just that, as well as
+ading a blank line between prints for easier reading. Lastly, this will
+only print on the simulator. You shouldn't leave your prints in your final
+app anyway, but if you do this should help improve performance.
+
+]]
+
 local cachedPrint = print
 local extendedPrint = function( ... )
     local a = ...
-    if system.getInfo("environment") == "simulator" or DEBUG == true then
-        if  a == nil then
-            cachedPrint("\nCrawlspace :: A Nil value")
-        elseif type(a) == "string" then
-            cachedPrint("\nCrawlspace :: String", a)
-        elseif type(a) == "number" then
-            cachedPrint("\nCrawlspace :: Number", a )
-        elseif type(a) == "table" then
-            cachedPrint("\nCrawlspace :: Key/Values")
-            for k,v in pairs(a) do
-                cachedPrint("Key: "..k, "Value: ", v)
-            end
-        else
-            cachedPrint("Crawlspace cachedPrint :: "..type(a), a)
-        end
+    if system.getInfo("environment") == "simulator" then
+        if type(a) == "table" then
+            cachedPrint("\nOutput Table Data:\n")
+            for k,v in pairs(a) do cachedPrint("\tKey: "..k, "Value: ", v) end
+        elseif #{...} > 1 then cachedPrint("\nOutput mutiple: ", ...)
+        else cachedPrint("\nOutput "..type(a).." :: ", a or "") end
     end
 end
 _G.print = extendedPrint
