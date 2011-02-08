@@ -38,27 +38,68 @@ display.bl = display.BottomLeftReferencePoint
 display.bc = display.BottomCenterReferencePoint
 display.br = display.BottomRightReferencePoint
 
-            --########## Crawlspace Display Objects Methods ##########--
+            --[[ ########## Crawlspace Display Objects Methods   ########## ]--
+
+Here is where the magic happens to all display objects. All methods are given
+a fadeIn() and fadeOut() method, to be used with optional parameters. You can
+include a callback if you'd like, or tell your fadeOut() to automatically remove
+the object when it's completed.
+
+If dynamic resolutions scare you, then you may use the setPos() method attached
+to every display object. It will take care of the dynamic part - just style it
+once. Also if you find yourself centering a lot of objects, you can call their
+center() method and either pass in "x", "y", or nothing to center both axis'.
+
+:: USAGE ::
+
+    myObject:fadeIn([time, callback])
+
+    myObject:fadeOut([time, callback, autoRemove])
+
+    myObject:center("x")
+
+    myObject:setPos(100, 200)
+
+:: EXAMPLE 1 ::
+
+    myImage = display.newImage("myImage")
+    myImage:center()
+    myImage:fadeIn()
+    timer.performWithDelay( 2000, myImage.fadeOut )
+
+:: EXAMPLE 2 ::
+
+    local myRectangle = display.newRect(0,0,100,50)
+    myRectangle:setPos(25, 25)
+
+]]
+
 local tranc = transition.cancel
 local displayMethods = function( obj )
     local d = obj
-    d.setPos = function(x,y) d.x, i.y = screenX+x, screenY+y end
-    d.center = function() d.x, d.y = centerX, centerY end
+    d.setPos = function(self,x,y) d.x, i.y = screenX+x, screenY+y end
+    d.center = function(self,axis) if axis == "x" then d.x=centerX elseif axis == "y" then d.y=centerY else d.x,d.y=centerX,centerY end end
     d.fader={}
     d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or 500, onComplete=callback}) end
     d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() d:removeSelf() end elseif autoRemove then d.callback = function() callback(); d:removeSelf() end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or 500, onComplete=d.callback}) end
 end
 
-            --########## Crawlspace Reference Points ##########--
+            --[[ ########## CrawlSpace Reference Points  ########## ]--
+
+Shorthand for all reference points.
+As an added bonus, if your image cannot be created, it will print out
+a nice warning message with wheatever image path was at fault.
+
+:: EXAMPLE 1 ::
+
+    myObject:setReferencePoint(display.tl)
+
+]]
+
 local referencePoints = function( obj, point )
     local rp = display[point] or display.c
-    if obj then
-        obj:setReferencePoint(rp)
-        return true
-    else
-        print("My deepest apologies, but I think you mistyped your image path. There was a problem creating your display object...\n\n\n")
-        return false
-    end
+    if obj then obj:setReferencePoint(rp); return true
+    else print("My deepest apologies, but there was a problem creating your display object... could you have mistyped your path?\n\n\n"); return false end
 end
 
             --[[ ########## newGroup Override  ########## ]--
