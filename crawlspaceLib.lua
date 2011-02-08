@@ -9,18 +9,8 @@ local mAtan2 = math.atan2
 local mPi    = math.pi
 local mSqrt  = math.sqrt
 
-
-local gameUI = require "gameUI"
-_G.flyer = gameUI.newFontXP{ ios="FlyerLT-BlackCondensed", android="FlyerLT-BlackCondensed" }
---local flyer = gameUI.newFontXP{ ios="FlyerLT-BlackCondensed", android=native.systemFontBold }
-
-_G.feltTip = gameUI.newFontXP{ ios="FeltTipRoman-Bold", android="FeltTipRoman-Bold" }
-
-if gameUI then
-    print("have the gameUI.lua")
-else
-    print("\n\n\n\n\n\n\nSorry chap, you need to include gameUI.lua to use this awesome feature.")
-    return false
+_G.initFont = function( fontName, globalName )
+    _G[globalName] = fontName
 end
 
             --########## Global Screen Dimensions ##########--
@@ -167,13 +157,28 @@ local safeCancel = function(t)
 end
 timer.cancel = safeCancel
 
-            --########## Retina Text ##########--
+            --[[ ########## Auto Retina Text ########## ]--
+
+This feature doesn't require much explanation. It overrides the default
+CoronaSDK display.newText and replaces it with auto retina text,
+which is simply doubling the text size and scaling it down.
+The only extra step is setting the position AFTER text is scaled,
+which solves a positioning problem after scaling.
+
+As with all display objects, you may append a string argument to set
+it's reference point.
+
+:: EXAMPLE ::
+
+    display.netText("My New Text", 100, 100, system.defaultFont, 36 [, "cr" ] )
+
+]]
+
 local cachedNewText = display.newText
 local crawlspaceNewText = function( text, xPos, yPos, font, size, rp )
-    local t = cachedNewText(text, xPos, yPos, font, size * 2)
-    referencePoints( t, rp )
-    displayMethods(t)
-    t.xScale, t.yScale = .5, .5
+    local t = cachedNewText(text, 0, 0, font, size * 2)
+    referencePoints( t, rp ); displayMethods(t)
+    t.xScale, t.yScale, t.x, t.y = .5, .5, xPos, yPos
     return t
 end
 display.newText = crawlspaceNewText
@@ -214,15 +219,21 @@ local newSFX = function( snd )
 end
 audio.playSFX = newSFX
 
-            --########## Safe Web Popups ##########--
+            --[[ ########## Safe Web Popups  ########## ]--
+
+Now when you want to make a web popup, it's active on the device,
+but in the simulator you'll see a rectangle in the same place as your
+popup. Now you won't need to build and install  to set it's position.
+
+:: EXAMPLE ::
+
+    native.showWebPopup( 10, 10, screenWidth - 20, screenHeight - 20, "http://crawlspacegames.com", {urlRequest=listener})
+
+]]
 local cachedPopup, cachedCancelWeb, curPopup = native.showWebPopup, native.cancelWebPopup
 local safeWebPopup = function( x, y, w, h, url, params )
-    if not simulator then
-        cachedPopup(x, y, w, h, url, params)
-    else
-        curPopup = display.newRect(x, y, w, h)
-        curPopup:setFillColor( 100, 100, 100 )
-    end
+    if not simulator then cachedPopup(x, y, w, h, url, params)
+    else curPopup = display.newRect(x, y, w, h); curPopup:setFillColor( 100, 100, 100 ) end
 end
 local safeCancelPopup = function()
     if curPopup then curPopup:removeSelf() else cachedCancelWeb() end
@@ -230,13 +241,23 @@ end
 native.showWebPopup = safeWebPopup
 native.cancelWebPopup = safeCancelPopup
 
-            --########## Easy SFX ##########--
-            --########## Print Available Fonts ##########--
+            --[[ ########## Print Available Fonts  ########## ]--
+
+Call printFonts() to see a printed list of all installed fonts.
+This comes in really handy when you want to use a custom font, 
+as you need to register the actual name of the font, and not the
+name of the file.
+
+
+:: EXAMPLE ::
+
+    printFonts()
+
+]]
+
 _G.printFonts = function()
     local fonts = native.getFontNames()
-    for k,v in pairs(fonts) do
-        print(v)
-    end
+    for k,v in pairs(fonts) do print(v) end
 end
 
 --==================== End CoronaSDK Hijacks ====================--
@@ -364,9 +385,20 @@ end
 _G.Load = loadData
 
 
-            --[[ ########## Executes these methods if there is internet ########## ]--
+            --[[ ########## Execute If Internet ########## ]--
 
+This very useful little method downloads a webpage from the internet,
+establishing whether or not the device has internet connectivity. 
 
+You can pass any function in at anytime. If there is internet, it fires.
+If there is no internet, it doesn't fire the function, and if we don't yet know
+if there is connectivity, the method is cached until we do know. You also
+have the option of passing in a method to fire if there is not internet.
+You may pass as many functions in as you have necessity.
+
+In addition, once we know whether or not there is internet, a global
+variable "internet" is set to true or false. Just make sure you don't try
+so access it during the first few seconds of launch.
 
 :: EXAMPLE 1 ::
 
@@ -411,30 +443,20 @@ _G.Load = loadData
 
 local toExecute = {}
 local executeOnNet = function()
-    for i=1, #toExecute do
-        local f = table.remove(toExecute); f(); f=nil
-    end
+    for i=1, #toExecute do local f = table.remove(toExecute); f(); f=nil end
 end
-            --########## Sets global variable "internet" ##########--
+-- Sets global variable "internet"
 local internetListener = function( event )
-    if event.isError then
-        _G.internet = false
-    else
-        _G.internet = true
-        executeOnNet()
-    end
+    if event.isError then _G.internet = false
+    else _G.internet = true; executeOnNet() end
     return true
 end
-network.request("http://floatgame.com/adtest.html", "GET", internetListener)
+network.request("http://google.com/", "GET", internetListener)
+
 _G.executeIfInternet = function(f)
-    if internet then
-        f()
-        return true
-    elseif internet == false then
-        return false
-    elseif internet == nil then
-        toExecute[#toExecute+1] = f
-    end
+    if internet then f(); return true
+    elseif internet == false then return false
+    elseif internet == nil then toExecute[#toExecute+1] = f end
 end
 
 local cachedPrint = print
