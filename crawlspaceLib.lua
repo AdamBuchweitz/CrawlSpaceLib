@@ -102,16 +102,20 @@ local referencePoints = function( obj, point )
     else print("My deepest apologies, but there was a problem creating your display object... could you have mistyped your path?\n\n\n"); return false end
 end
 
-            --[[ ########## newGroup Override  ########## ]--
+            --[[ ########## NewGroup Override  ########## ]--
 
 At long last you may insert multiple objects into a group with
 a single line! There is no syntax change, and you may still insert
 object when instantiating the group.
 
+:: USAGE ::
+
+    myGroup:insert([index, ] myObject [, mySecondObject, myThirdObject, resetTransform])
+
 :: EXAMPLE 1 ::
 
     local myGroup = display.newGroup()
-    myGroup:insert(myImage, myRect, myRoundRect, myImageRect)
+    myGroup:insert(myImage, myRect, myRoundedRect, myImageRect)
 
 :: EXAMPLE 2 ::
 
@@ -167,24 +171,24 @@ crawlspaceNewRect= function( x, y, w, h, rp )
 end
 display.newRect= crawlspaceNewRect
 
-            --[[ ########## NewRoundRect Override  ########## ]--
+            --[[ ########## NewRoundedRect Override  ########## ]--
 
 As with all display objects, you may append a string argument to set
 it's reference point.
 
 :: EXAMPLE 1 ::
 
-    display.newRoundRect( 0, 0, 100, 50, 10 [, "tl"])
+    display.newRoundedRect( 0, 0, 100, 50, 10 [, "tl"])
 
 ]]
 
-local cachedNewRoundRect = display.newRoundRect
-crawlspaceNewRoundRect= function( x, y, w, h, r, rp )
-    local r = cachedNewRoundRect( x, x, w, h, r )
+local cachedNewRoundedRect = display.newRoundedRect
+local crawlspaceNewRoundedRect = function( x, y, w, h, r, rp )
+    local r = cachedNewRoundedRect( 0, 0, w, h, r ); r.x,r.y=x,y
     if referencePoints( r, rp ) then displayMethods( r ) end
     return r
 end
-display.newRoundRect= crawlspaceNewRoundRect
+display.newRoundedRect= crawlspaceNewRoundedRect
 
             --[[ ########## NewImage Override  ########## ]--
 
@@ -583,7 +587,7 @@ local extendedPrint = function( ... )
         end
     end
 end
-_G.print = extendedPrint
+--_G.print = extendedPrint
 
 local welcome = function()
     local print = cachedPrint
@@ -591,6 +595,11 @@ local welcome = function()
     print("CrawlSpaceLib v1.0\n")
     print("Welcome to the CrawlSpace Library!\n\n\tA lot of work has gone into making this very powerful while also keeping it very, very easy to use.")
     print("\n\n")
+
+    print(scale)
+    local device=""; if scale==.5 then device="@2x" elseif scale<.5 then device="@iPad" end
+    local lsntr = function ( event ) if not event.isError then local t=event.target; t:fadeIn(); t.timer=function()t:fadeOut(500,true)end; timer.performWithDelay(2000, t) end end
+    display.loadRemoteImage( "http://crawlspacegames.com/images/splash"..device..".png", "GET", lsntr, "splash.png", system.TemporaryDirectory, screenWidth/scale, screenHeight/scale )
 end
 
 local showTip = function()
