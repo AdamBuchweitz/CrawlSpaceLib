@@ -1,18 +1,10 @@
-<<<<<<< HEAD
-- Crawl Space Library
+# Crawl Space Library
 
---- v1.0
-=======
-= Crawl Space Library
-
-==v1.0
->>>>>>> bfcd8600eea15978046aaf8a104698d68ab1d2b5
+## v1.0
 
 All methods and features are documented in crawlspaceLib.lua
 
 To see a list of features, run crawlspaceLib.listFeatures()
-
-[an example](http://example.com/ "Title")
 
 To donate, [go here](http://www.crawlspacegames.com/crawl-space-corona-sdk-library/ "Donate") 
 
