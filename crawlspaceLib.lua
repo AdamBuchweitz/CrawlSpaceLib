@@ -1,11 +1,10 @@
 module(..., package.seeall)
-local audio  = require "audio"
 
 -- Set this to false to bypass the welcome message
-local showIntro = false
+local showIntro = true
 
 -- Set this to false to bypass the random Lua/CoronaSDK tips
-local showTip = true
+local startupTips = true
 
             --[[ ########## Global Screen Dimensions ########## ]--
 
@@ -387,7 +386,9 @@ textColor  = 255, 0, 0
 
 The method returns a group, which cannot be directly editted (yet),
 but can be handled like any other group. You may position it,
-transition it, insert it into another group, etc.
+transition it, insert it into another group, etc. Additionally,
+All paragraph text is accessible, though not edditable, with
+myParagraph.text
 
 :: USAGE ::
 
@@ -546,6 +547,7 @@ a slider that changes the volume, do not forget to change the volume variable!
     audio.crossFadeBackground("myBackgroundMusic")
 ]]
 
+local audio  = require "audio"
 local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
 local crossFadeBackground = function( path )
     local musicPath = path or retrieveVariable("musicPath")
@@ -831,20 +833,65 @@ local extendedPrint = function( ... )
 end
 _G.print = extendedPrint
 
+listFeatures = function()
+    cachedPrint("\nFeature List:\n")
+    cachedPrint("\n+ Global variables for dynamic resolution")
+    cachedPrint("\n+ Super simple saving and loading")
+    cachedPrint("\n+ Shortened reference points, passible as arguments to all display objects")
+    cachedPrint("\n+ Insert multiple objects into a group")
+    cachedPrint("\n+ Automatic retina-ready text")
+    cachedPrint("\n+ Paragraphs")
+    cachedPrint("\n+ Exposed API: timer.cancelAll()")
+    cachedPrint("\n+ Safe timer.cancel()")
+    cachedPrint("\n+ Crossfade background audio")
+    cachedPrint("\n+ Play SFX based on registered true/false variable")
+    cachedPrint("\n+ Simulator-friendly webPopups")
+    cachedPrint("\n+ Print installed font names with printFonts()")
+    cachedPrint("\n+ Initialize and globalize a font with one line")
+    cachedPrint("\n+ Execute a function if internet is detected, execute another if not connected")
+    cachedPrint("\n+ Global information handling")
+    cachedPrint("\n+ Extended print statement")
+end
+
+            --[[ ########## Startup Tips ########## ]--
+
+If you want to disable these, change the 'startupTips' to false.
+If you have a tip to share, please email it to me at
+
+        adam@crawlspacegames.com
+
+and I'll include it here.
+
+]]
+
+local tipArray = {
+    "Local, local, local, local... Always remember to think local",
+    "Global is baaaad!",
+    "'print' is your #1 debugging tool",
+    "Paragraphs can be aligned 'left', 'right', and 'center'.",
+    "The full paragraph text is accessible with yourParagraph.text",
+    "You can disable these tips by setting the 'startupTips' variable to false in crawlspacelib.lua",
+    "crawlspace.help() is coming soon - get help on the specific feature rather than searching the whole library.",
+    "Do you have a helpful Lua or CoronaSDK tip? Please send it to me and I'll include it in the library!"
+}
+local showTip = function()
+    cachedPrint("\n\nTip:\n\n\t"..tipArray[math.random(1,#tipArray)])
+end
+
+            --[[ ########## Welcome! ########## ]]--
+
 local welcome = function()
     local print = cachedPrint
+    print("\n\n\nYou can disable this welcome message by setting the 'showIntro' variable to\nfalse in crawlspacelib.lua")
     print("\n\n")
     print("CrawlSpaceLib v1.0\n")
-    print("Welcome to the CrawlSpace Library!\n\n\tA lot of work has gone into making this very powerful while also keeping it very, very easy to use.")
-    print("\n\n")
+    print("Welcome to the CrawlSpace Library!\n\n\t    A lot of work has gone into making this very powerful while also\n\tkeeping it very, very easy to use. With that being said, we will happily\n\taccept your donation! Try the library out, see if it saves you any time,\n\teffort, or headaches, and even if you don't decide to donate, I'd still\n\tlove to hear about your experience.")
+    print("\n\t    Take a peek at crawlspacelib.lua for detailed instructions on\n\thow to use the library, or just take advantage of its features passivly,\n\tas many are simple enhancements to existing CoronaSDK functionality.\n\tAlternatively, you may run the crawlspacelib.listFeatures() method to\n\tget a quick list of everything included.")
+    print("\n\n\tDonate: http://www.crawlspacegames.com/crawl-space-corona-sdk-library/\n\n\tEmail me: adam@crawlspacegames.com")
 
     local device=""; if scale==.5 then device="@2x" elseif scale<.5 then device="@iPad" end
     local lsntr = function ( event ) if not event.isError then local t=event.target; t.xScale,t.yScale=scale,scale; t.x,t.y=centerX,centerY; t:fadeIn(); t.timer=function()t:fadeOut(500,true)end; timer.performWithDelay(2000, t) end end
     display.loadRemoteImage( "http://crawlspacegames.com/images/splash"..device..".png", "GET", lsntr, "splash"..device..".png", system.TemporaryDirectory )
 end
 
-local showTip = function()
-    print("A tasty treat goes here!")
-end
-
-if showIntro then welcome() elseif startupTips then showtip() end
+if showIntro then welcome() elseif startupTips then showTip() end
