@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 - Crawl Space Library
 
 --- v1.0
+=======
+= Crawl Space Library
+
+==v1.0
+>>>>>>> bfcd8600eea15978046aaf8a104698d68ab1d2b5
 
 All methods and features are documented in crawlspaceLib.lua
 
