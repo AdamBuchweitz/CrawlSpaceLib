@@ -1,0 +1,13 @@
+= Crawl Space Library
+
+==v1.0
+
+All methods and features are documented in crawlspaceLib.lua
+
+To see a list of features, run crawlspaceLib.listFeatures()
+
+[an example](http://example.com/ "Title")
+
+To donate, [go here](http://www.crawlspacegames.com/crawl-space-corona-sdk-library/ "Donate") 
+
+To email me, drop your note [here](mailto:adam@crawlspacegames.com "Email")
