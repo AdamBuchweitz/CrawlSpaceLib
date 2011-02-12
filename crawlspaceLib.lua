@@ -363,11 +363,25 @@ it's reference point.
 
 ]]
 
+local hexTable = {f=15,e=14,d=13,c=12,b=11,a=10}
+local crawlspaceTextColor = function(self,r,g,b)
+    local r,g,b = r,g,b
+    if type(r) == "string" then
+        r = string.gsub(r,"#","")
+        local hex = {}; string.gsub(r,".",function(a) hex[#hex+1] = a end)
+        for i=1, #hex do if not tonumber(hex[i]) then hex[i]=hexTable[hex[i]] end end
+        r,g,b = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6]
+    end
+    self:cachedTextColor(r,g,b)
+end
+
 local cachedNewText = display.newText
 local crawlspaceNewText = function( text, xPos, yPos, font, size, rp )
     local t = cachedNewText(text, 0, 0, font, size * 2)
     referencePoints( t, rp ); displayMethods(t)
     t.xScale, t.yScale, t.x, t.y = .5, .5, xPos, yPos
+    t.cachedTextColor = t.setTextColor
+    t.setTextColor = crawlspaceTextColor
     return t
 end
 display.newText = crawlspaceNewText
