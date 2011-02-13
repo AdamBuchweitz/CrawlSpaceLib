@@ -182,6 +182,18 @@ center() method and either pass in "x", "y", or nothing to center both axis'.
 
 ]]
 
+local hexTable = {f=15,e=14,d=13,c=12,b=11,a=10}
+local crawlspaceFillColor = function(self,r,g,b)
+    local r,g,b = r,g,b
+    if type(r) == "string" then
+        r = string.lower(string.gsub(r,"#",""))
+        local hex = {}; string.gsub(r,".",function(a) hex[#hex+1] = a end)
+        for i=1, #hex do if not tonumber(hex[i]) then hex[i]=hexTable[hex[i]] end end
+        r,g,b = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6]
+    end
+    self:cachedFillColor(r,g,b)
+end
+
 local tranc = transition.cancel
 local displayMethods = function( obj )
     local d = obj
@@ -190,6 +202,7 @@ local displayMethods = function( obj )
     d.fader={}
     d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or 500, onComplete=callback}) end
     d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() d:removeSelf() end elseif autoRemove then d.callback = function() callback(); d:removeSelf() end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or 500, onComplete=d.callback}) end
+    if d.setFillColor then d.cachedFillColor = d.setFillColor; d.setFillColor = crawlspaceFillColor end
 end
 
             --[[ ########## CrawlSpace Reference Points  ########## ]--
@@ -363,11 +376,10 @@ it's reference point.
 
 ]]
 
-local hexTable = {f=15,e=14,d=13,c=12,b=11,a=10}
 local crawlspaceTextColor = function(self,r,g,b)
     local r,g,b = r,g,b
     if type(r) == "string" then
-        r = string.gsub(r,"#","")
+        r = string.lower(string.gsub(r,"#",""))
         local hex = {}; string.gsub(r,".",function(a) hex[#hex+1] = a end)
         for i=1, #hex do if not tonumber(hex[i]) then hex[i]=hexTable[hex[i]] end end
         r,g,b = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6]
@@ -757,6 +769,9 @@ applicationExit to save them for use on next launch. Other than saving data,
 it's very helpful to use these to keep track of a score, or a volume leve,
 whether or not to play SFX, etc.
 
+This set of functions is left accessible via crawlspaceLib.registerVariable
+because if you find yourself using them often you will want them localized.
+
 As a side note, Crawl Space Library automatically registers a variable for
 "volume" and "sfx", as these are going to be used in most projects.
 
@@ -793,26 +808,26 @@ As a side note, Crawl Space Library automatically registers a variable for
 
 ]]
 
-local registeredVariables = {}
-local registerVariable = function(...)
+registeredVariables = {}
+registerVariable = function(...)
     local var, var2 = ...; var = var2 or var
     registeredVariables[var[1]] = var[2]
 end
 _G.registerVar = registerVariable
 
-local registerBulk = function(...)
+registerBulk = function(...)
     local var, var2 = ...; var = var2 or var
     for i,v in ipairs(var[1]) do registerVariable{var[1][i], var[2]} end
 end
 _G.registerBulk = registerBulk
 
-local retrieveVariable = function(...)
+retrieveVariable = function(...)
     local name, name2 = ...; name = name2 or name
     return registeredVariables[name]
 end
 _G.getVar = retrieveVariable
 
-local adjustVariable = function(...)
+adjustVariable = function(...)
     local new, new2 = ...; new = new2 or new
     if type(new[2]) == "number" then
         registeredVariables[new[1]] = registeredVariables[new[1]] + new[2]
