@@ -1,10 +1,65 @@
-module(..., package.seeall)
+
+        --[[ ########## Crawl Space Library ########## ]--
+
+    Version 1.1
+
+    Written and supported by Adam Buchweitz and Crawl Space Games
+
+    http://crawlspacegames.com
+    http://twitter.com/crawlspacegames
+
+
+    For inquiries about Crawl Space, email us at
+        heyyou@crawlspacegames.com
+
+    For support with this library, email me at
+        adam@crawlspacegames.com
+
+
+    Copyright (C) 2011 Crawl Space Games - All Rights Reserved
+
+
+    All functionality is documented below. For syntax help use .help()
+
+    For a list of included features, use the .listFeatures() method.
+
+
+    Note:
+        If you use the standard director class by Ricardo Rauber
+        and use timer.cancelAll() you will cancel timers from the 
+        director! Either modify your version of the director class,
+        or use the one included with this library.
+
+]]--
+local CSL = {}
 
 -- Set this to false to bypass the welcome message
 local showIntro = true
 
 -- Set this to false to bypass the random Lua/CoronaSDK tips
 local startupTips = true
+
+            --[[ ########## Getting Help ########## ]--
+
+Start with:
+
+    local CSL = require "crawlspaceLib"
+    CSL.help()
+
+]]
+local helpArr = {}
+CSL.help = function(item)
+    if not item then
+        cachedPrint("\n\nUse this help feature for syntax additions in Crawl Space functions.")
+        cachedPrint('\n\nUSAGE EXAMPLE:\n\n\tcrawlspaceLib.help("newText")')
+    else
+        cachedPrint('\n\nCrawlSpace Help: '..item..'\n')
+        if helpArr[item] then cachedPrint('\t'..helpArr[item]) else
+            cachedPrint('Sorry, I cannot find that item. Available items are:')
+            for k,v in pairs(helpArr) do cachedPrint('\n -- '..k) end
+        end
+    end
+end
 
             --[[ ########## Global Screen Dimensions ########## ]--
 
@@ -24,10 +79,9 @@ are simply global remaps of display.contentCenterX and Y.
     display.newRect(screenX, screenY, screenWidth, screenHeight) -- Cover the screen, no matter what size
 
 ]]
-local centerX, centerY = display.contentCenterX, display.contentCenterY
-local screenX, screenY = display.screenOriginX, display.screenOriginY
-local screenWidth, screenHeight = display.contentWidth - screenX * 2, display.contentHeight - screenY * 2
-_G.centerX, _G.centerY, _G.screenX, _G.screenY, _G.screenWidth, _G.screenHeight = centerX, centerY, screenX, screenY, screenWidth, screenHeight
+centerX, centerY = display.contentCenterX, display.contentCenterY
+screenX, screenY = display.screenOriginX, display.screenOriginY
+screenWidth, screenHeight = display.contentWidth - screenX * 2, display.contentHeight - screenY * 2
 display.contentWidth, display.contentHeight = screenWidth, screenHeight
 
             --[[ ########## Global Content Scale and Suffix  ########## ]--
@@ -40,11 +94,10 @@ the global variable "simulator" is set to true.
 
 ]]
 
-local scale, suffix = display.contentScaleX, ""
+scale, suffix = display.contentScaleX, ""
 if scale < 1 then suffix = "@2x" end
-_G.scale, _G.suffix = scale, suffix
 
-if system.getInfo("environment") == "simulator" then _G.simulator = true end
+if system.getInfo("environment") == "simulator" then simulator = true end
 
             --[[ ########## Saving and Loading ########## ]--
 
@@ -73,6 +126,8 @@ returns the table.
 
 ]]
 
+helpArr.Save = 'Save(table [, filename])'
+helpArr.save = 'Did you mean "Save" ?'
 local split = function(str, pat)
     local t = {}
     local fpat = "(.-)" .. pat
@@ -90,7 +145,7 @@ local split = function(str, pat)
     return t  
 end
 
-local saveData = function(table, fileName)
+Save = function(table, fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "w" )
 
@@ -100,9 +155,10 @@ local saveData = function(table, fileName)
 
     io.close( file )
 end
-_G.Save = saveData
 
-local loadData = function(fileName)
+helpArr.Load = 'local mySavedData = Load([filename])'
+helpArr.load = 'Did you mean "Load"?'
+Load = function(fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "r" )
 
@@ -114,6 +170,11 @@ local loadData = function(fileName)
         for i = 1, #datavars do
             local onevalue = split(datavars[i], "=")
             dataTableNew[onevalue[1]] = onevalue[2]
+            if (onevalue[2] == "true") then
+                dataTableNew[onevalue[1]] = true;
+            elseif (onevalue[2] == "false") then
+                dataTableNew[onevalue[1]] = false;
+            end
         end
 
         io.close( file ) -- important!
@@ -123,7 +184,6 @@ local loadData = function(fileName)
         return false
     end
 end
-_G.Load = loadData
 
             --[[ ########## Reference Point Shorthand ########## ]--
 
@@ -136,6 +196,8 @@ The main purpose of this is for passing short values into display objects.
 
 ]]
 
+helpArr.referencePoint = 'myDisplayObject:setReferencePoint(display.tl)'
+helpArr.referencePoints = '"tl", "tc", "tb", "cl", "c", "cr", "bl", "bc", "br"\n\n\tAlso added to the display package: display.tl'
 display.tl = display.TopLeftReferencePoint
 display.tc = display.TopCenterReferencePoint
 display.tr = display.TopRightReferencePoint
@@ -182,16 +244,17 @@ center() method and either pass in "x", "y", or nothing to center both axis'.
 
 ]]
 
+helpArr.setFillColor = 'myRect:setFillColor( hex )\n\n\tor\n\n\tmyRect:setFillColor( red, green, blue [, alpha] )'
 local hexTable = {f=15,e=14,d=13,c=12,b=11,a=10}
-local crawlspaceFillColor = function(self,r,g,b)
-    local r,g,b = r,g,b
+local crawlspaceFillColor = function(self,r,g,b,a)
+    local r,g,b,a = r,g,b,a
     if type(r) == "string" then
         r = string.lower(string.gsub(r,"#",""))
-        local hex = {}; string.gsub(r,".",function(a) hex[#hex+1] = a end)
+        local hex = {}; string.gsub(r,".",function(v) hex[#hex+1] = v end)
         for i=1, #hex do if not tonumber(hex[i]) then hex[i]=hexTable[hex[i]] end end
-        r,g,b = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6]
+        r,g,b,a = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6],( hex[7] or 0 )*( hex[8] or 0 )
     end
-    self:cachedFillColor(r,g,b)
+    self:cachedFillColor(r,g,b,a or 255)
 end
 
 local tranc = transition.cancel
@@ -255,6 +318,7 @@ object when instantiating the group.
 
 ]]
 
+helpArr.insert = 'myGroup:insert([index,] object1 [, object2, object3, resetTransform])'
 local crawlspaceInsert = function(...)
     local t = {...}
     local b, reset = 0, nil
@@ -264,14 +328,32 @@ local crawlspaceInsert = function(...)
     end
 end
 local cachedNewGroup = display.newGroup
-crawlspaceNewGroup = function(...)
+display.newGroup = function(...)
     local g = cachedNewGroup(...)
     g.cachedInsert = g.insert
     g.insert = crawlspaceInsert
     displayMethods( g )
     return g
 end
-display.newGroup = crawlspaceNewGroup
+
+            --[[ ########## NewCircle Override  ########## ]--
+
+As with all display objects, you may append a string argument to set
+it's reference point.
+
+:: EXAMPLE 1 ::
+
+    display.newRect(centerX, centerY, 20 [, "tl"])
+
+]]
+
+local cachedNewCircle = display.newCircle
+display.newCircle = function( x, y, r, rp )
+    local c = cachedNewCircle( 0, 0, r )
+    if referencePoints( c, rp ) then displayMethods( c ) end
+    c.x, c.y = x, y
+    return c
+end
 
             --[[ ########## NewRect Override  ########## ]--
 
@@ -284,13 +366,14 @@ it's reference point.
 
 ]]
 
+helpArr.newRect = 'display.newRect(x-position, y-position, width, height [,referencePoint])'
 local cachedNewRect = display.newRect
-crawlspaceNewRect= function( x, y, w, h, rp )
-    local r = cachedNewRect( x, y, w, h )
+display.newRect = function( x, y, w, h, rp )
+    local r = cachedNewRect( 0, 0, w, h )
     if referencePoints( r, rp ) then displayMethods( r ) end
+    r.x, r.y = x, y
     return r
 end
-display.newRect= crawlspaceNewRect
 
             --[[ ########## NewRoundedRect Override  ########## ]--
 
@@ -303,13 +386,14 @@ it's reference point.
 
 ]]
 
+helpArr.newRoundedRect = 'display.newRoundedRect(x-position, y-position, width, height, radius [, referencePoint])'
 local cachedNewRoundedRect = display.newRoundedRect
-local crawlspaceNewRoundedRect = function( x, y, w, h, r, rp )
+display.newRoundedRect = function( x, y, w, h, r, rp )
     local r = cachedNewRoundedRect( 0, 0, w, h, r ); r.x,r.y=x,y
     if referencePoints( r, rp ) then displayMethods( r ) end
+    r.x, r.y = x, y
     return r
 end
-display.newRoundedRect= crawlspaceNewRoundedRect
 
             --[[ ########## NewImage Override  ########## ]--
 
@@ -325,13 +409,13 @@ it's reference point.
 
 ]]
 
+helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referencePoint])\n\n\tNote that x and y positions are defaulted to the dynamic resolution value of the top left corner of the screen.'
 local cachedNewImage = display.newImage
-crawlspaceNewImage= function( path, x, y, rp )
+display.newImage = function( path, x, y, rp )
     local i = cachedNewImage( path, x or screenX, y or screenY )
     if referencePoints( i, rp ) then displayMethods( i ) end
     return i
 end
-display.newImage= crawlspaceNewImage
 
             --[[ ########## NewImageRect Override  ########## ]--
 
@@ -351,13 +435,32 @@ it's reference point.
 
 ]]
 
+helpArr.newImageRect = 'display.newImage(filename [, width, height, referencePoint])\n\n\tNote that width and height values are defaulted to 380 and 570 respectively. These values corrospond to the "magic formula" commonly used to dynamic resolutions.'
+helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referencePoint])'
 local cachedNewImageRect = display.newImageRect
-crawlspaceNewImageRect = function( path, w, h, rp )
+display.newImageRect = function( path, w, h, rp )
     local i = cachedNewImageRect( path, w or 380, h or 570 )
     if referencePoints( i, rp ) then displayMethods( i ) end
     return i
 end
-display.newImageRect = crawlspaceNewImageRect
+
+            --[[ ########## Sprite Override ########## ]--
+
+As with all display objects, you may append a string argument to set
+it's reference point.
+
+:: EXAMPLE 1 ::
+
+    sprite.newSprite( mySpriteSet [, "tl"])
+
+]]
+local sprite = require "sprite"
+local cachedNewSprite = sprite.newSprite
+sprite.newSprite = function( spriteSet, rp )
+    local s = cachedNewSprite( spriteSet )
+    if referencePoints( s, rp ) then displayMethods( s ) end
+    return s
+end
 
             --[[ ########## Auto Retina Text ########## ]--
 
@@ -372,10 +475,11 @@ it's reference point.
 
 :: EXAMPLE ::
 
-    display.netText("My New Text", 100, 100, system.defaultFont, 36 [, "cr" ] )
+    display.newText("My New Text", 100, 100, native.systemFont, 36 [, "cr" ] )
 
 ]]
 
+helpArr.setTextColor = 'myText:setTextColor( hex )\n\n\tor\n\n\tmyText:setTextColor( red, green, blue )'
 local crawlspaceTextColor = function(self,r,g,b)
     local r,g,b = r,g,b
     if type(r) == "string" then
@@ -387,8 +491,9 @@ local crawlspaceTextColor = function(self,r,g,b)
     self:cachedTextColor(r,g,b)
 end
 
+helpArr.newText = 'display.newText(string, x-position, y-position, font, size [, referencePoint ] )'
 local cachedNewText = display.newText
-local crawlspaceNewText = function( text, xPos, yPos, font, size, rp )
+display.newText = function( text, xPos, yPos, font, size, rp )
     local t = cachedNewText(text, 0, 0, font, size * 2)
     referencePoints( t, rp ); displayMethods(t)
     t.xScale, t.yScale, t.x, t.y = .5, .5, xPos, yPos
@@ -396,7 +501,6 @@ local crawlspaceNewText = function( text, xPos, yPos, font, size, rp )
     t.setTextColor = crawlspaceTextColor
     return t
 end
-display.newText = crawlspaceNewText
 
             --[[ ########## New Paragraphs ########## ]--
 
@@ -438,6 +542,7 @@ myParagraph.text
 
 ]]
 
+helpArr.newParagraph = 'display.newParagraph( string, charactersWide, { [font=font, size=size, lineHeight=lineHeight, align=align] })\n\n\tor\n\n\tdisplay.newParagraph( string, charactersWide, size )'
 local textAlignments = {left="cl",right="cr",center="c",centered="c",middle="c"}
 display.newParagraph = function( string, width, params )
     local format; if type(params) == "number" then format={size = params} else format=params end
@@ -503,9 +608,10 @@ in which case simply pass in "false" when you creat your timer.
 
 ]]
 
+helpArr.timer = 'timer.performWithDelay( delay, function [, repeats, omitFromCancelAll])'
 local timerArray = {}
 local cachedTimer = timer.performWithDelay
-timerWithTracking = function( time, callback, repeats, add )
+timer.performWithDelay = function( time, callback, repeats, add )
     local repeats, add = repeats, add
     if type(repeats) == "boolean" then add = repeats; repeats = nil end
     local t = cachedTimer(time, callback, repeats)
@@ -515,13 +621,12 @@ timerWithTracking = function( time, callback, repeats, add )
     return t
 end
 
-local cancelAllTimers = function()
+helpArr.cancelAll = 'timer.cancelAll()'
+timer.cancelAll = function()
     for i=1, #timerArray do
         timer.cancel(timerArray[i])
     end
 end
-timer.cancelAll = cancelAllTimers
-timer.performWithDelay = timerWithTracking
 
             --[[ ########## Safe Timer Cancel ########## ]--
 
@@ -546,10 +651,24 @@ a kind warning letting you know, but there be no error
 ]]
 
 local cachedTimerCancel = timer.cancel
-local safeCancel = function(t)
+timer.cancel = function(t)
     if t then cachedTimerCancel(t) else print("Whoops, that timer doesn't exist!") end
 end
-timer.cancel = safeCancel
+
+            --[[ ########## Multiple Transition ########## ]--
+
+]]
+local cachedTransitionTo = transition.to
+transition.to = function(input, params)
+    if #input > 0 then
+        for i,v in ipairs(input) do
+            if params.targetSelf == true then params.onComplete = input[i] end
+            cachedTransitionTo(input[i], params)
+        end
+    else
+        return cachedTransitionTo(input, params)
+    end
+end
 
             --[[ ########## Crossfade Background Music ########## ]--
 
@@ -575,12 +694,12 @@ a slider that changes the volume, do not forget to change the volume variable!
 
 local audio  = require "audio"
 local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
-local crossFadeBackground = function( path )
-    local musicPath = path or retrieveVariable("musicPath")
+audio.crossFadeBackground = function( path )
+    local musicPath = path or CSL.retrieveVariable("musicPath")
     if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
     audio.fadeOut({channel=audioChannel, time=500})
     if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
-    audio.setVolume( retrieveVariable("volume"), {audioChannel})
+    audio.setVolume( CSL.retrieveVariable("volume"), {audioChannel})
     curAudio = audio.loadStream( musicPath )
     audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
     prevAudio = curAudio
@@ -589,7 +708,6 @@ local crossFadeBackground = function( path )
 end
 audio.reserveChannels(2)
 audio.currentBackgroundChannel = 1
-audio.crossFadeBackground = crossFadeBackground
 
             --[[ ########## True or False SFX ########## ]--
 
@@ -618,13 +736,19 @@ often, you should still preload it.
 
 ]]
 
-local newSFX = function( snd )
-    if retrieveVariable("sfx") == true then
-        if type(snd) == "string" then return audio.play(audio.loadSound( snd ))
-        else return audio.play(snd) end
+audio.playSFX = function( snd, params )
+    if CSL.retrieveVariable("sfx") == true then
+        local play = function()
+            if type(snd) == "string" then return audio.play(audio.loadSound(snd, params))
+            else return audio.play(snd, params) end
+        end
+        if params.delay then
+            timer.performWithDelay(params.delay, play)
+        else
+            play()
+        end
     end
 end
-audio.playSFX = newSFX
 
             --[[ ########## Safe Web Popups  ########## ]--
 
@@ -639,15 +763,14 @@ popup. Now you won't need to build and install  to set it's position.
 ]]
 
 local cachedPopup, cachedCancelWeb, curPopup = native.showWebPopup, native.cancelWebPopup
-local safeWebPopup = function( x, y, w, h, url, params )
+native.showWebPopup = function( x, y, w, h, url, params )
     if not simulator then cachedPopup(x, y, w, h, url, params)
     else curPopup = display.newRect(x, y, w, h); curPopup:setFillColor( 100, 100, 100 ) end
 end
-local safeCancelPopup = function()
+native.cancelWebPopup = function()
     if curPopup then curPopup:removeSelf() else cachedCancelWeb() end
 end
-native.showWebPopup = safeWebPopup
-native.cancelWebPopup = safeCancelPopup
+
 
             --[[ ########## Print Available Fonts  ########## ]--
 
@@ -663,7 +786,7 @@ name of the file.
 
 ]]
 
-_G.printFonts = function()
+printFonts = function()
     local fonts = native.getFontNames()
     for k,v in pairs(fonts) do print(v) end
 end
@@ -682,7 +805,7 @@ mind clear.
 
 ]]
 
-_G.initFont = function( fontName, globalName ) _G[globalName] = fontName end
+initFont = function( fontName, globalName ) _G[globalName] = fontName end
 
             --[[ ########## Execute If Internet ########## ]--
 
@@ -701,7 +824,7 @@ so access it during the first few seconds of launch.
 
 :: EXAMPLE 1 ::
 
-    local myFunction = function()
+    local myFunction = function(
         print("I haz interwebz!")
     end
 
@@ -740,6 +863,7 @@ so access it during the first few seconds of launch.
 
 ]]
 
+helpArr.executeIfInternet = 'executeIfInternet(myInternetMethod, myNonInternetMethod)'
 local toExecute = {}
 local executeOnNet = function()
     for i=1, #toExecute do local f = table.remove(toExecute); f(); f=nil end
@@ -752,7 +876,7 @@ local internetListener = function( event )
 end
 network.request("http://google.com/", "GET", internetListener)
 
-_G.executeIfInternet = function(f)
+executeIfInternet = function(f)
     if internet then f(); return true
     elseif internet == false then return false
     elseif internet == nil then toExecute[#toExecute+1] = f end
@@ -808,36 +932,40 @@ As a side note, Crawl Space Library automatically registers a variable for
 
 ]]
 
-registeredVariables = {}
-registerVariable = function(...)
+CSL.registeredVariables = {}
+CSL.registerVariable = function(...)
     local var, var2 = ...; var = var2 or var
-    registeredVariables[var[1]] = var[2]
+    CSL.registeredVariables[var[1]] = var[2]
 end
-_G.registerVar = registerVariable
+registerVar = CSL.registerVariable
 
-registerBulk = function(...)
+CSL.registerBulk = function(...)
     local var, var2 = ...; var = var2 or var
-    for i,v in ipairs(var[1]) do registerVariable{var[1][i], var[2]} end
+    for i,v in ipairs(var[1]) do CSL.registerVariable{var[1][i], var[2]} end
 end
-_G.registerBulk = registerBulk
+registerBulk = CSL.registerBulk
 
-retrieveVariable = function(...)
+CSL.retrieveVariable = function(...)
     local name, name2 = ...; name = name2 or name
-    return registeredVariables[name]
+    return CSL.registeredVariables[name]
 end
-_G.getVar = retrieveVariable
+getVar = CSL.retrieveVariable
 
-adjustVariable = function(...)
+CSL.setVariable = function(...)
     local new, new2 = ...; new = new2 or new
     if type(new[2]) == "number" then
-        registeredVariables[new[1]] = registeredVariables[new[1]] + new[2]
-        if new[3] then registeredVariables[new[1]] = new[2] end
-    else registeredVariables[new[1]] = new[2] end
+        if not CSL.registeredVariables[new[1]] then
+            CSL.registeredVariables[new[1]] = new[2]
+        else
+            CSL.registeredVariables[new[1]] = CSL.registeredVariables[new[1]] + new[2]
+            if new[3] then CSL.registeredVariables[new[1]] = new[2] end
+        end
+    else CSL.registeredVariables[new[1]] = new[2] end
 end
-_G.setVar = adjustVariable
+setVar = CSL.setVariable
 
-registerVariable{"volume", 1}
-registerVariable{"sfx", true}
+CSL.registerVariable{"volume", 1}
+CSL.registerVariable{"sfx", true}
 
             --[[ ########## Extended Print ########## ]--
 
@@ -849,10 +977,10 @@ app anyway, but if you do this should help improve performance.
 
 ]]
 
-local cachedPrint = print
-local extendedPrint = function( ... )
+cachedPrint = print
+print = function( ... )
     local a = ...
-    if system.getInfo("environment") == "simulator" then
+    if simulator then
         if type(a) == "table" then
             cachedPrint("\nOutput Table Data:\n")
             for k,v in pairs(a) do cachedPrint("\tKey: "..k, "Value: ", v) end
@@ -860,7 +988,6 @@ local extendedPrint = function( ... )
         else cachedPrint("\nOutput "..type(a).." :: ", a or "") end
     end
 end
-_G.print = extendedPrint
 
             --[[ ########## List Feature ########## ]--
 
@@ -868,7 +995,7 @@ List all features for quick reference
 
 ]]
 
-listFeatures = function()
+CSL.listFeatures = function()
     cachedPrint("\nFeature List:\n")
     cachedPrint("\n+ Global variables for dynamic resolution")
     cachedPrint("\n+ Super simple saving and loading")
@@ -906,7 +1033,7 @@ local tipArray = {
     "Paragraphs can be aligned 'left', 'right', and 'center'.",
     "The full paragraph text is accessible with yourParagraph.text",
     "You can disable these tips by setting the 'startupTips' variable to false in crawlspacelib.lua",
-    "crawlspace.help() is coming soon - get help on the specific feature rather than searching the whole library.",
+    "Try running .help() for syntax help ( i.e. CSL.help('executeIfInternet'))",
     "Do you have a helpful Lua or CoronaSDK tip? Please send it to me and I'll include it in the library!"
 }
 local showTip = function()
@@ -930,3 +1057,5 @@ local welcome = function()
 end
 
 if showIntro then welcome() elseif startupTips then showTip() end
+
+return CSL
