@@ -1,7 +1,7 @@
 
         --[[ ########## Crawl Space Library ########## ]--
 
-    Version 1.1
+    Version 1.1.2
 
     Written and supported by Adam Buchweitz and Crawl Space Games
 
@@ -26,7 +26,7 @@
 
     Note:
         If you use the standard director class by Ricardo Rauber
-        and use timer.cancelAll() you will cancel timers from the 
+        and use timer.cancelAll() you will cancel timers from the
         director! Either modify your version of the director class,
         or use the one included with this library.
 
@@ -142,7 +142,7 @@ local split = function(str, pat)
         cap = str:sub(last_end)
         table.insert(t,cap)
     end
-    return t  
+    return t
 end
 
 Save = function(table, fileName)
@@ -170,11 +170,8 @@ Load = function(fileName)
         for i = 1, #datavars do
             local onevalue = split(datavars[i], "=")
             dataTableNew[onevalue[1]] = onevalue[2]
-            if (onevalue[2] == "true") then
-                dataTableNew[onevalue[1]] = true;
-            elseif (onevalue[2] == "false") then
-                dataTableNew[onevalue[1]] = false;
-            end
+            if (onevalue[2] == "true") then dataTableNew[onevalue[1]] = true
+            elseif (onevalue[2] == "false") then dataTableNew[onevalue[1]] = false end
         end
 
         io.close( file ) -- important!
@@ -658,6 +655,18 @@ end
             --[[ ########## Multiple Transition ########## ]--
 
 ]]
+local cachedTransitionFrom = transition.from
+transition.from = function(input, params)
+    if #input > 0 then
+        for i,v in ipairs(input) do
+            if params.targetSelf == true then params.onComplete = input[i] end
+            cachedTransitionFrom(input[i], params)
+        end
+    else
+        return cachedTransitionFrom(input, params)
+    end
+end
+
 local cachedTransitionTo = transition.to
 transition.to = function(input, params)
     if #input > 0 then
@@ -739,11 +748,11 @@ often, you should still preload it.
 audio.playSFX = function( snd, params )
     if CSL.retrieveVariable("sfx") == true then
         local play = function()
-            if type(snd) == "string" then return audio.play(audio.loadSound(snd, params))
+            if type(snd) == "string" then return audio.play(audio.loadSound(snd), params)
             else return audio.play(snd, params) end
         end
-        if params.delay then
-            timer.performWithDelay(params.delay, play)
+        if params and params.delay then
+            timer.performWithDelay(params.delay, play, false)
         else
             play()
         end
@@ -775,7 +784,7 @@ end
             --[[ ########## Print Available Fonts  ########## ]--
 
 Call printFonts() to see a printed list of all installed fonts.
-This comes in really handy when you want to use a custom font, 
+This comes in really handy when you want to use a custom font,
 as you need to register the actual name of the font, and not the
 name of the file.
 
@@ -807,10 +816,31 @@ mind clear.
 
 initFont = function( fontName, globalName ) _G[globalName] = fontName end
 
+
+            --[[ ########## Cross Platform Filename ########## ]--
+
+
+]]
+
+crossPlatformFilename = function( filename, iosSuffix, androidSuffix )
+    if not iosSuffix and not androidSuffix then
+        error("You must supply a suffix for both iOS and Android", 2)
+    elseif not iosSuffix then
+        error("You must supply a suffix for iOS", 2)
+    elseif not androidSuffix then
+        error("You must supply a suffix for Android", 2)
+    end
+    if system.isAndroid then
+        _G[filename] = filename..androidSuffix
+    else
+        _G[filename] = filename..iosSuffix
+    end
+end
+
             --[[ ########## Execute If Internet ########## ]--
 
 This very useful little method downloads a webpage from the internet,
-establishing whether or not the device has internet connectivity. 
+establishing whether or not the device has internet connectivity.
 
 You can pass any function in at anytime. If there is internet, it fires.
 If there is no internet, it doesn't fire the function, and if we don't yet know
@@ -935,6 +965,7 @@ As a side note, Crawl Space Library automatically registers a variable for
 CSL.registeredVariables = {}
 CSL.registerVariable = function(...)
     local var, var2 = ...; var = var2 or var
+    if var[2] == "true" then var[2] = true elseif var[2] == "false" then var[2] = false end
     CSL.registeredVariables[var[1]] = var[2]
 end
 registerVar = CSL.registerVariable
@@ -947,7 +978,9 @@ registerBulk = CSL.registerBulk
 
 CSL.retrieveVariable = function(...)
     local name, name2 = ...; name = name2 or name
-    return CSL.registeredVariables[name]
+    local var = CSL.registeredVariables[name]
+    if tonumber(var) then var = tonumber(var) end
+    return var
 end
 getVar = CSL.retrieveVariable
 
@@ -960,7 +993,10 @@ CSL.setVariable = function(...)
             CSL.registeredVariables[new[1]] = CSL.registeredVariables[new[1]] + new[2]
             if new[3] then CSL.registeredVariables[new[1]] = new[2] end
         end
-    else CSL.registeredVariables[new[1]] = new[2] end
+    else
+        if new[2] == "true" then new[2] = true elseif new[2] == "false" then new[2] = false end
+        CSL.registeredVariables[new[1]] = new[2]
+    end
 end
 setVar = CSL.setVariable
 
@@ -1046,7 +1082,7 @@ local welcome = function()
     local print = cachedPrint
     print("\n\n\nYou can disable this welcome message by setting the 'showIntro' variable to\nfalse in crawlspacelib.lua")
     print("\n\n")
-    print("CrawlSpaceLib v1.0\n")
+    print("CrawlSpaceLib v1.1.2\n")
     print("Welcome to the CrawlSpace Library!\n\n\t    A lot of work has gone into making this very powerful while also\n\tkeeping it very, very easy to use. With that being said, we will happily\n\taccept your donation! Try the library out, see if it saves you any time,\n\teffort, or headaches, and even if you don't decide to donate, I'd still\n\tlove to hear about your experience.")
     print("\n\t    Take a peek at crawlspacelib.lua for detailed instructions on\n\thow to use the library, or just take advantage of its features passivly,\n\tas many are simple enhancements to existing CoronaSDK functionality.\n\tAlternatively, you may run the crawlspacelib.listFeatures() method to\n\tget a quick list of everything included.")
     print("\n\n\tDonate: http://www.crawlspacegames.com/crawl-space-corona-sdk-library/\n\n\tEmail me: adam@crawlspacegames.com")
