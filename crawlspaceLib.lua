@@ -366,8 +366,8 @@ it's reference point.
 helpArr.newRect = 'display.newRect(x-position, y-position, width, height [,referencePoint])'
 local cachedNewRect = display.newRect
 display.newRect = function( x, y, w, h, rp )
-    local r = cachedNewRect( 0, 0, w, h )
-    if referencePoints( r, rp ) then displayMethods( r ) end
+    local r = cachedNewRect( x, y, w, h )
+    if referencePoints( r, rp or "tl" ) then displayMethods( r ) end
     r.x, r.y = x, y
     return r
 end
