@@ -149,6 +149,7 @@ Save = function(table, fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "w" )
 
+    if not table then table = Data end
     for k,v in pairs( table ) do
         file:write( k .. "=" .. tostring(v) .. "," )
     end
@@ -175,12 +176,24 @@ Load = function(fileName)
         end
 
         io.close( file ) -- important!
+        if not fileName then
+            for k,v in pairs(dataTableNew) do
+                Data[k] = v
+            end
+        end
         return dataTableNew
     else
-        print("Hey, ya gotta create the file first. Try using: Save(yourTable)")
+        print("No data to load yet.")
         return false
     end
 end
+
+Defaults = function(d)
+    for k,v in pairs(d) do
+        Data[k] = v
+    end
+end
+Data = {}
 
             --[[ ########## Reference Point Shorthand ########## ]--
 
