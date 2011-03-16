@@ -1,6 +1,6 @@
 # Crawl Space Library
 
-## v1.3
+## v1.1.3
 
 All methods and features are documented in crawlspaceLib.lua
 
