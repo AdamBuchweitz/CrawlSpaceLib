@@ -1,6 +1,6 @@
 # Crawl Space Library
 
-## v1.1
+## v1.3
 
 All methods and features are documented in crawlspaceLib.lua
 
@@ -24,11 +24,11 @@ local CSL = require "crawlspaceLib"
 ### To see a list of features:
 
 <code>
-local CSL = require "crawlspaceLib"
+local CSL = require "crawlspaceLib"<br>
 CSL.listFeatures()
 </code>
 
-
+---
 
 To donate, ___[go here](http://www.crawlspacegames.com/crawl-space-corona-sdk-library/ "Donate")___
 
