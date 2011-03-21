@@ -34,10 +34,10 @@
 local CSL = {}
 
 -- Set this to false to bypass the welcome message
-local showIntro = true
+local showIntro = false
 
 -- Set this to false to bypass the random Lua/CoronaSDK tips
-local startupTips = true
+local startupTips = false
 
             --[[ ########## Getting Help ########## ]--
 
@@ -260,8 +260,8 @@ local displayMethods = function( obj )
     d.setPos = function(self,x,y) d.x, i.y = screenX+x, screenY+y end
     d.center = function(self,axis) if axis == "x" then d.x=centerX elseif axis == "y" then d.y=centerY else d.x,d.y=centerX,centerY end end
     d.fader={}
-    d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or 500, onComplete=callback}) end
-    d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() d:removeSelf() end elseif autoRemove then d.callback = function() callback(); d:removeSelf() end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or 500, onComplete=d.callback}) end
+    d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
+    d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() d:removeSelf() end elseif autoRemove then d.callback = function() callback(); d:removeSelf() end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
     if d.setFillColor then d.cachedFillColor = d.setFillColor; d.setFillColor = crawlspaceFillColor end
 end
 
@@ -657,7 +657,7 @@ end
 ]]
 local cachedTransitionFrom = transition.from
 transition.from = function(input, params)
-    if #input > 0 then
+    if input and #input > 0 then
         for i,v in ipairs(input) do
             if params.targetSelf == true then params.onComplete = input[i] end
             cachedTransitionFrom(input[i], params)
@@ -669,7 +669,7 @@ end
 
 local cachedTransitionTo = transition.to
 transition.to = function(input, params)
-    if #input > 0 then
+    if input and #input > 0 then
         for i,v in ipairs(input) do
             if params.targetSelf == true then params.onComplete = input[i] end
             cachedTransitionTo(input[i], params)
@@ -746,10 +746,12 @@ often, you should still preload it.
 ]]
 
 audio.playSFX = function( snd, params )
+    local channel
     if CSL.retrieveVariable("sfx") == true then
         local play = function()
-            if type(snd) == "string" then return audio.play(audio.loadSound(snd), params)
-            else return audio.play(snd, params) end
+            if params and params.delay then params.delay=nil end
+            if type(snd) == "string" then channel=audio.play(audio.loadSound(snd), params)
+            else channel=audio.play(snd, params) end
         end
         if params and params.delay then
             timer.performWithDelay(params.delay, play, false)
@@ -757,6 +759,7 @@ audio.playSFX = function( snd, params )
             play()
         end
     end
+    return channel
 end
 
             --[[ ########## Safe Web Popups  ########## ]--
@@ -1093,5 +1096,72 @@ local welcome = function()
 end
 
 if showIntro then welcome() elseif startupTips then showTip() end
+
+local achievements, leaderboards, openfeint
+local enableOF = function( params )
+    openfeint = require("openfeint")
+    if not params then print("Please provide me with Open Feint info"); return false else
+        if not params.productKey    then print("Missing Open Feint product key") end
+        if not params.productSecret then print("Missing Open Feint product secret") end
+        if not params.displayName   then print("Missing Open Feint display name") end
+        if not params.appId         then print("Missing Open Feint app ID") end
+    end
+    openfeint.init(params.productKey,params.productSecret,params.displayName,params.appId)
+    --if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards end
+    local feint = require("feint")
+    achievements, leaderboards = feint.achievements, feint.leaderboards
+end
+Achieve = function( achievement )
+    --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to unlock and achievement."); return false end
+    if tonumber(achievement) then
+        if #tostring(achievement) ~= 6 then print("Invalid achievement number")
+        else require("openfeint").unlockAchievement(tostring(achievement)) end
+    else
+        if achievements then
+            if achievements[achievement] then require("openfeint").unlockAchievement(tostring(achievements[achievement]))
+            else print("Cannot find that achievement") end
+        else
+            if _G.achievements and _G.achievements[achievement] then require("openfeint").unlockAchievement(tostring(_G.achievements[achievement]))
+            else print("Cannot find that achievement") end
+        end
+    end
+end
+HighScore = function( board, score, display )
+    --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to submit a High Score."); return false end
+    local board = board
+    if tonumber(board) then
+        if #tostring(board) ~= 6 then print("Invalid leaderboard number"); return false end
+    else
+        if leaderboards then
+            if leaderboards[board] then board = leaderboards[board]
+            else print("Cannot find that leaderboard"); return false end
+        else
+            if _G.leaderboards and _G.leaderboards[board] then board = _G.leaderboards[board]
+            else print("Cannot find that leaderboard"); return false end
+        end
+    end
+    require("openfeint").setHighScore( { leaderboardID=tostring(board), score=tonumber(score), displayText=tostring(display)} )
+    --openfeint.setHighScore( { leaderboardID=boards[board], score=curBest, displayText=bestScore.text} )
+end
+
+local enableFlurry = function( id )
+    if not id then print("Please supply a valid app ID")
+    else analytics.init(id) end
+end
+
+local libs = { openfeint = enableOF, analytics = enableFlurry}
+Enable = function(library, params)
+    local l
+    if package.preload[ library ] then l=require(library)
+    elseif system.pathForFile(library..".lua", system.ResourceDirectory) then l=require(library)
+    else print("The library: "..library.." was not found. Please check your spelling.") end
+    if package.loaded[library] then
+        if libs[library] then libs[library](params) end
+        return l
+    end
+end
+
+math.randomseed(system.getTimer())
+math.random(); math.random(); math.random()
 
 return CSL
