@@ -95,7 +95,7 @@ the global variable "simulator" is set to true.
 ]]
 
 scale, suffix = display.contentScaleX, ""
-if scale < 1 then suffix = "@2x" end
+if scale < 1 then if scale > .5 then suffix = "@1.5x" else suffix = "@2x" end end
 
 if system.getInfo("environment") == "simulator" then simulator = true end
 
