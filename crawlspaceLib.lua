@@ -1097,6 +1097,8 @@ end
 
 if showIntro then welcome() elseif startupTips then showTip() end
 
+local cache = {}
+cache.require = require
 local achievements, leaderboards, openfeint
 local enableOF = function( params )
     openfeint = require("openfeint")
@@ -1150,16 +1152,23 @@ local enableFlurry = function( id )
 end
 
 local libs = { openfeint = enableOF, analytics = enableFlurry}
+local probLibs = {"audio"}
+local problemLibrary = function(toCheck)
+    for i,v in ipairs(probLibs) do if toCheck == v then return true end end
+    return false
+end
 Enable = function(library, params)
     local l
-    if package.preload[ library ] then l=require(library)
-    elseif system.pathForFile(library..".lua", system.ResourceDirectory) then l=require(library)
+    if package.preload[ library ] then l=cache.require(library)
+    elseif system.pathForFile(library..".lua", package.path) then l=cache.require(library)
+    elseif problemLibrary(library) then l=cache.require(library)
     else print("The library: "..library.." was not found. Please check your spelling.") end
     if package.loaded[library] then
         if libs[library] then libs[library](params) end
         return l
     end
 end
+require = Enable
 
 math.randomseed(system.getTimer())
 math.random(); math.random(); math.random()
