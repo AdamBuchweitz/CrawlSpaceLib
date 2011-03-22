@@ -31,13 +31,20 @@
         or use the one included with this library.
 
 ]]--
-local CSL = {}
 
 -- Set this to false to bypass the welcome message
 local showIntro = false
 
 -- Set this to false to bypass the random Lua/CoronaSDK tips
 local startupTips = false
+
+
+
+-- CSL is the actual object returned
+local CSL = {}
+
+-- The cache of native and Corona APIs
+local cache = {}
 
             --[[ ########## Getting Help ########## ]--
 
@@ -1097,7 +1104,6 @@ end
 
 if showIntro then welcome() elseif startupTips then showTip() end
 
-local cache = {}
 cache.require = require
 local achievements, leaderboards, openfeint
 local enableOF = function( params )
@@ -1151,20 +1157,20 @@ local enableFlurry = function( id )
     else analytics.init(id) end
 end
 
-local libs = { openfeint = enableOF, analytics = enableFlurry}
-local probLibs = {"audio"}
-local problemLibrary = function(toCheck)
-    for i,v in ipairs(probLibs) do if toCheck == v then return true end end
+local libraryMethods = { openfeint = enableOF, analytics = enableFlurry}
+local libraryWhitelist = {"audio"}
+local checkWhitelist = function(toCheck)
+    for i,v in ipairs(libraryWhitelist) do if toCheck == v then return true end end
     return false
 end
 Enable = function(library, params)
     local l
     if package.preload[ library ] then l=cache.require(library)
     elseif system.pathForFile(library..".lua", package.path) then l=cache.require(library)
-    elseif problemLibrary(library) then l=cache.require(library)
+    elseif checkWhitelist(library) then l=cache.require(library)
     else print("The library: "..library.." was not found. Please check your spelling.") end
     if package.loaded[library] then
-        if libs[library] then libs[library](params) end
+        if libraryMethods[library] then libraryMethods[library](params) end
         return l
     end
 end
