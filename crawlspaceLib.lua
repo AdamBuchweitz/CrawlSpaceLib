@@ -183,24 +183,12 @@ Load = function(fileName)
         end
 
         io.close( file ) -- important!
-        if not fileName then
-            for k,v in pairs(dataTableNew) do
-                Data[k] = v
-            end
-        end
         return dataTableNew
     else
-        print("No data to load yet.")
+        print("Hey, ya gotta create the file first. Try using: Save(yourTable)")
         return false
     end
 end
-
-Defaults = function(d)
-    for k,v in pairs(d) do
-        Data[k] = v
-    end
-end
-Data = {}
 
             --[[ ########## Reference Point Shorthand ########## ]--
 
