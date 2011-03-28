@@ -1120,7 +1120,7 @@ if showIntro then welcome() elseif startupTips then showTip() end
 cache.require = require
 local achievements, leaderboards, openfeint
 local enableOF = function( params )
-    openfeint = require("openfeint")
+    openfeint = cache.require("openfeint")
     if not params then print("Please provide me with Open Feint info"); return false else
         if not params.productKey    then print("Missing Open Feint product key") end
         if not params.productSecret then print("Missing Open Feint product secret") end
@@ -1129,20 +1129,20 @@ local enableOF = function( params )
     end
     openfeint.init(params.productKey,params.productSecret,params.displayName,params.appId)
     --if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards end
-    local feint = require("feint")
+    local feint = cache.require("feint")
     achievements, leaderboards = feint.achievements, feint.leaderboards
 end
 Achieve = function( achievement )
     --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to unlock and achievement."); return false end
     if tonumber(achievement) then
         if #tostring(achievement) ~= 6 then print("Invalid achievement number")
-        else require("openfeint").unlockAchievement(tostring(achievement)) end
+        else cache.require("openfeint").unlockAchievement(tostring(achievement)) end
     else
         if achievements then
-            if achievements[achievement] then require("openfeint").unlockAchievement(tostring(achievements[achievement]))
+            if achievements[achievement] then cache.require("openfeint").unlockAchievement(tostring(achievements[achievement]))
             else print("Cannot find that achievement") end
         else
-            if _G.achievements and _G.achievements[achievement] then require("openfeint").unlockAchievement(tostring(_G.achievements[achievement]))
+            if _G.achievements and _G.achievements[achievement] then cache.require("openfeint").unlockAchievement(tostring(_G.achievements[achievement]))
             else print("Cannot find that achievement") end
         end
     end
@@ -1161,7 +1161,7 @@ HighScore = function( board, score, display )
             else print("Cannot find that leaderboard"); return false end
         end
     end
-    require("openfeint").setHighScore( { leaderboardID=tostring(board), score=tonumber(score), displayText=tostring(display)} )
+    cache.require("openfeint").setHighScore( { leaderboardID=tostring(board), score=tonumber(score), displayText=tostring(display)} )
     --openfeint.setHighScore( { leaderboardID=boards[board], score=curBest, displayText=bestScore.text} )
 end
 
