@@ -675,27 +675,44 @@ end
             --[[ ########## Multiple Transition ########## ]--
 
 ]]
-local cachedTransitionFrom = transition.from
-transition.from = function(input, params)
-    if input and #input > 0 then
-        for i,v in ipairs(input) do
-            if params.targetSelf == true then params.onComplete = input[i] end
-            cachedTransitionFrom(input[i], params)
+cache.transitionFrom = transition.from
+transition.from = function(tweens, params)
+    if tweens then
+        if #tweens > 0 then
+            for i,v in ipairs(tweens) do
+                if params.targetSelf then params.onComplete = v end
+                cache.transitionFrom(v, params)
+            end
+        else
+            return cache.transitionFrom(tweens, params)
         end
-    else
-        return cachedTransitionFrom(input, params)
     end
 end
 
-local cachedTransitionTo = transition.to
-transition.to = function(input, params)
-    if input and #input > 0 then
-        for i,v in ipairs(input) do
-            if params.targetSelf == true then params.onComplete = input[i] end
-            cachedTransitionTo(input[i], params)
+cache.transitionTo = transition.to
+transition.to = function(tweens, params)
+    if tweens then
+        if #tweens > 0 then
+            for i,v in ipairs(tweens) do
+                if params.targetSelf then params.onComplete = v end
+                cache.transitionTo(v, params)
+            end
+        else
+            return cache.transitionTo(tweens, params)
         end
-    else
-        return cachedTransitionTo(input, params)
+    end
+end
+
+cache.transitionCancel = transition.cancel
+transition.cancel = function( tweens)
+    if tweens then
+        if #tweens > 0 then
+            for i,v in ipairs(tweens) do
+                cache.transitionCancel(v)
+            end
+        else
+            cache.transitionCancel(tweens)
+        end
     end
 end
 
