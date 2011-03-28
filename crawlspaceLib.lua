@@ -1166,17 +1166,27 @@ end
 Enable = function(library, params)
     local l
     if package.preload[ library ] then l=cache.require(library)
-    elseif system.pathForFile(library..".lua", package.path) then l=cache.require(library)
     elseif checkWhitelist(library) then l=cache.require(library)
+    elseif system.pathForFile(library..".lua", package.path ) then l=cache.require(library)
     else print("The library: "..library.." was not found. Please check your spelling.") end
     if package.loaded[library] then
         if libraryMethods[library] then libraryMethods[library](params) end
         return l
     end
 end
-require = Enable
+if simulator then require = Enable end
 
+
+-- Generate randomseed and pull the first three numbers out
 math.randomseed(system.getTimer())
 math.random(); math.random(); math.random()
+
+platform = {}
+local name = string.lower(system.getInfo("platformName"))
+if name     == "android"   then platform.android = true
+elseif name == "iphone os" then platform.ios     = true
+elseif name == "win"       then platform.win     = true
+elseif name == "mac os x"  then platform.mac     = true end
+platform.name = name
 
 return CSL
