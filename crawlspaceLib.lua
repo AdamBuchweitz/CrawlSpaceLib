@@ -1085,23 +1085,34 @@ app anyway, but if you do this should help improve performance.
 
 ]]
 
+local printObj, printYpos
 cache.print = print
 print = function( ... )
     local a = ...
-    if CSL.debugWindow then
-        CSL.debugWindow.text = CSL.debugWindow.text..("\nOutput Table Data:\n")
-        if type(a) == "table" then
-        end
-            --for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
-        --elseif #{...} > 1 then cache.print("\nOutput mutiple: ", ...)
-        --else cache.print("\nOutput "..type(a).." :: ", a or "") end
-    end
-    if not simulator then
+    if simulator then
         if type(a) == "table" then
             cache.print("\nOutput Table Data:\n")
             for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
         elseif #{...} > 1 then cache.print("\nOutput mutiple: ", ...)
         else cache.print("\nOutput "..type(a).." :: ", a or "") end
+    else
+        if CSL.debugWindow then
+            if #{...} > 1 then
+                for k,v in pairs(a) do
+                    printYpos = printYpos + 12
+                    printObj = display.newText(tostring(v), 0, printYpos, native.systemFont, 10, "tl")
+                    printObj:setTextColor(255, 255, 255)
+                    CSL.debugWindow:insert(printObj)
+                    CSL.debugWindow.y = CSL.debugWindow.y - 12
+                end
+            else
+                printYpos = printYpos + 12
+                printObj = display.newText(tostring(a), 0, printYpos, native.systemFont, 10, "tl")
+                printObj:setTextColor(255, 255, 255)
+                CSL.debugWindow:insert(printObj)
+                CSL.debugWindow.y = CSL.debugWindow.y - 12
+            end
+        end
     end
 end
 
@@ -1260,21 +1271,47 @@ elseif name == "win"       then platform.win     = true
 elseif name == "mac os x"  then platform.mac     = true end
 platform.name = name
 
-local debugging = false
 local debugTimer= nil
+local set = function()
+    if CSL.debugWindow then
+        if CSL.debugWindow.isVisible then CSL.debugWindow.isVisible = false
+        else CSL.debugWindow.isVisible = true end
+    else
+        printYpos = screenY + 20
+        debugWindow = display.newGroup()
+        debugWindow.x, debugWindow.y = screenX + 10, printYpos
+        debugWindow:setReferencePoint(display.bl)
+        debugWindow:addEventListener("touch", debugWindow)
+        debugWindow.delta = printYpos
+        debugWindow.touch = function( self, event )
+            if event.phase == "began" then
+                display.getCurrentStage():setFocus( self )
+            elseif event.phase == "moved" then
+                debugWindow.y = debugWindow.delta + event.y-event.yStart
+            elseif event.phase == "ended" then
+                debugWindow.delta = debugWindow.y
+                if debugWindow.y + debugWindow.contentHeight < screenY+20 then
+                    transition.to(debugWindow, {y=screenY+20-debugWindow.contentHeight, time=100, transitioning=easing.inOutQuad})
+                    debugWindow.delta = screenY+20-debugWindow.contentHeight
+                elseif debugWindow.y > screenY+screenHeight-100 then
+                    transition.to(debugWindow, {y=screenY+screenHeight-100, time=100, transitioning=easing.inOutQuad})
+                    debugWindow.delta = screenY+screenHeight-100
+                end
+                display.getCurrentStage():setFocus( nil )
+            end
+        end
+        CSL.debugWindow = debugWindow
+        print(":: PRINT ::")
+    end
+end
+
 CSL.printDebugger = function( event )
     local event = event
     if event.phase == "began" then
-        local set = function()
-            CSL.debugWindow = display.newText("", screenX, screenY+screenHeight-50, native.systemFont, 12)
-            debugging = true
-            Runtime:removeEventListener("touch", CSL.printDebugger)
-        end
-        debugTimer = timer.performWithDelay(2000, set)
+        debugTimer = timer.performWithDelay(5000, set)
     elseif event.phase == "ended" then timer.cancel(debugTimer) end
 end
 
 Runtime:addEventListener("touch", CSL.printDebugger)
-Runtime:addEventListener("enterFrame", function() print("hi") end)
 
 return CSL
