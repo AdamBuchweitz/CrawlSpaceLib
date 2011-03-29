@@ -30,6 +30,9 @@
         director! Either modify your version of the director class,
         or use the one included with this library.
 
+    Thanks to Kenn Wagenheim, Jay Jennings, Bruce Martin for all your
+    input, contributions, and testing. You guys are great!
+
 ]]--
 
 -- Set this to false to bypass the welcome message
@@ -1085,7 +1088,15 @@ app anyway, but if you do this should help improve performance.
 cache.print = print
 print = function( ... )
     local a = ...
-    if simulator then
+    if CSL.debugWindow then
+        CSL.debugWindow.text = CSL.debugWindow.text..("\nOutput Table Data:\n")
+        if type(a) == "table" then
+        end
+            --for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
+        --elseif #{...} > 1 then cache.print("\nOutput mutiple: ", ...)
+        --else cache.print("\nOutput "..type(a).." :: ", a or "") end
+    end
+    if not simulator then
         if type(a) == "table" then
             cache.print("\nOutput Table Data:\n")
             for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
@@ -1101,23 +1112,24 @@ List all features for quick reference
 ]]
 
 CSL.listFeatures = function()
-    cache.print("\nFeature List:\n")
-    cache.print("\n+ Global variables for dynamic resolution")
-    cache.print("\n+ Super simple saving and loading")
-    cache.print("\n+ Shortened reference points, passible as arguments to all display objects")
-    cache.print("\n+ Insert multiple objects into a group")
-    cache.print("\n+ Automatic retina-ready text")
-    cache.print("\n+ Paragraphs")
-    cache.print("\n+ Exposed API: timer.cancelAll()")
-    cache.print("\n+ Safe timer.cancel()")
-    cache.print("\n+ Crossfade background audio")
-    cache.print("\n+ Play SFX based on registered true/false variable")
-    cache.print("\n+ Simulator-friendly webPopups")
-    cache.print("\n+ Print installed font names with printFonts()")
-    cache.print("\n+ Initialize and globalize a font with one line")
-    cache.print("\n+ Execute a function if internet is detected, execute another if not connected")
-    cache.print("\n+ Global information handling")
-    cache.print("\n+ Extended print statement")
+    local print = cache.print
+    print("\nFeature List:\n")
+    print("\n+ Global variables for dynamic resolution")
+    print("\n+ Super simple saving and loading")
+    print("\n+ Shortened reference points, passible as arguments to all display objects")
+    print("\n+ Insert multiple objects into a group")
+    print("\n+ Automatic retina-ready text")
+    print("\n+ Paragraphs")
+    print("\n+ Exposed API: timer.cancelAll()")
+    print("\n+ Safe timer.cancel()")
+    print("\n+ Crossfade background audio")
+    print("\n+ Play SFX based on registered true/false variable")
+    print("\n+ Simulator-friendly webPopups")
+    print("\n+ Print installed font names with printFonts()")
+    print("\n+ Initialize and globalize a font with one line")
+    print("\n+ Execute a function if internet is detected, execute another if not connected")
+    print("\n+ Global information handling")
+    print("\n+ Extended print statement")
 end
 
             --[[ ########## Startup Tips ########## ]--
@@ -1247,5 +1259,22 @@ elseif name == "iphone os" then platform.ios     = true
 elseif name == "win"       then platform.win     = true
 elseif name == "mac os x"  then platform.mac     = true end
 platform.name = name
+
+local debugging = false
+local debugTimer= nil
+CSL.printDebugger = function( event )
+    local event = event
+    if event.phase == "began" then
+        local set = function()
+            CSL.debugWindow = display.newText("", screenX, screenY+screenHeight-50, native.systemFont, 12)
+            debugging = true
+            Runtime:removeEventListener("touch", CSL.printDebugger)
+        end
+        debugTimer = timer.performWithDelay(2000, set)
+    elseif event.phase == "ended" then timer.cancel(debugTimer) end
+end
+
+Runtime:addEventListener("touch", CSL.printDebugger)
+Runtime:addEventListener("enterFrame", function() print("hi") end)
 
 return CSL
