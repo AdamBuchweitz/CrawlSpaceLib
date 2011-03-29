@@ -44,7 +44,7 @@ local startupTips = false
 local CSL = {}
 
 -- The cache of native and Corona APIs
-local cache = {}
+cache = {}
 
             --[[ ########## Getting Help ########## ]--
 
@@ -57,13 +57,13 @@ Start with:
 local helpArr = {}
 CSL.help = function(item)
     if not item then
-        cachedPrint("\n\nUse this help feature for syntax additions in Crawl Space functions.")
-        cachedPrint('\n\nUSAGE EXAMPLE:\n\n\tcrawlspaceLib.help("newText")')
+        cache.print("\n\nUse this help feature for syntax additions in Crawl Space functions.")
+        cache.print('\n\nUSAGE EXAMPLE:\n\n\tcrawlspaceLib.help("newText")')
     else
-        cachedPrint('\n\nCrawlSpace Help: '..item..'\n')
-        if helpArr[item] then cachedPrint('\t'..helpArr[item]) else
-            cachedPrint('Sorry, I cannot find that item. Available items are:')
-            for k,v in pairs(helpArr) do cachedPrint('\n -- '..k) end
+        cache.print('\n\nCrawlSpace Help: '..item..'\n')
+        if helpArr[item] then cache.print('\t'..helpArr[item]) else
+            cache.print('Sorry, I cannot find that item. Available items are:')
+            for k,v in pairs(helpArr) do cache.print('\n -- '..k) end
         end
     end
 end
@@ -344,9 +344,9 @@ local crawlspaceInsert = function(...)
     else for i=2, #t-b do t[1]:cachedInsert(t[i],reset); if reset and t[i].text then t[i].xScale, t[i].yScale=.5,.5 end end
     end
 end
-local cachedNewGroup = display.newGroup
+cache.newGroup = display.newGroup
 display.newGroup = function(...)
-    local g = cachedNewGroup(...)
+    local g = cache.newGroup(...)
     g.cachedInsert = g.insert
     g.insert = crawlspaceInsert
     displayMethods( g )
@@ -364,9 +364,9 @@ it's reference point.
 
 ]]
 
-local cachedNewCircle = display.newCircle
+cache.newCircle = display.newCircle
 display.newCircle = function( x, y, r, rp )
-    local c = cachedNewCircle( 0, 0, r )
+    local c = cache.newCircle( 0, 0, r )
     if referencePoints( c, rp ) then displayMethods( c ) end
     c.x, c.y = x, y
     return c
@@ -384,9 +384,9 @@ it's reference point.
 ]]
 
 helpArr.newRect = 'display.newRect(x-position, y-position, width, height [,referencePoint])'
-local cachedNewRect = display.newRect
+cache.newRect = display.newRect
 display.newRect = function( x, y, w, h, rp )
-    local r = cachedNewRect( x, y, w, h )
+    local r = cache.newRect( x, y, w, h )
     if referencePoints( r, rp or "tl" ) then displayMethods( r ) end
     r.x, r.y = x, y
     return r
@@ -404,9 +404,9 @@ it's reference point.
 ]]
 
 helpArr.newRoundedRect = 'display.newRoundedRect(x-position, y-position, width, height, radius [, referencePoint])'
-local cachedNewRoundedRect = display.newRoundedRect
+cache.newRoundedRect = display.newRoundedRect
 display.newRoundedRect = function( x, y, w, h, r, rp )
-    local r = cachedNewRoundedRect( 0, 0, w, h, r ); r.x,r.y=x,y
+    local r = cache.newRoundedRect( 0, 0, w, h, r ); r.x,r.y=x,y
     if referencePoints( r, rp ) then displayMethods( r ) end
     r.x, r.y = x, y
     return r
@@ -427,9 +427,9 @@ it's reference point.
 ]]
 
 helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referencePoint])\n\n\tNote that x and y positions are defaulted to the dynamic resolution value of the top left corner of the screen.'
-local cachedNewImage = display.newImage
+cache.newImage = display.newImage
 display.newImage = function( path, x, y, rp )
-    local i = cachedNewImage( path, x or screenX, y or screenY )
+    local i = cache.newImage( path, x or screenX, y or screenY )
     if referencePoints( i, rp ) then displayMethods( i ) end
     return i
 end
@@ -454,9 +454,9 @@ it's reference point.
 
 helpArr.newImageRect = 'display.newImage(filename [, width, height, referencePoint])\n\n\tNote that width and height values are defaulted to 380 and 570 respectively. These values corrospond to the "magic formula" commonly used to dynamic resolutions.'
 helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referencePoint])'
-local cachedNewImageRect = display.newImageRect
+cache.newImageRect = display.newImageRect
 display.newImageRect = function( path, w, h, rp )
-    local i = cachedNewImageRect( path, w or 380, h or 570 )
+    local i = cache.newImageRect( path, w or 380, h or 570 )
     if referencePoints( i, rp ) then displayMethods( i ) end
     return i
 end
@@ -472,9 +472,9 @@ it's reference point.
 
 ]]
 local sprite = require "sprite"
-local cachedNewSprite = sprite.newSprite
+cache.newSprite = sprite.newSprite
 sprite.newSprite = function( spriteSet, rp )
-    local s = cachedNewSprite( spriteSet )
+    local s = cache.newSprite( spriteSet )
     if referencePoints( s, rp ) then displayMethods( s ) end
     return s
 end
@@ -509,9 +509,9 @@ local crawlspaceTextColor = function(self,r,g,b)
 end
 
 helpArr.newText = 'display.newText(string, x-position, y-position, font, size [, referencePoint ] )'
-local cachedNewText = display.newText
+cache.newText = display.newText
 display.newText = function( text, xPos, yPos, font, size, rp )
-    local t = cachedNewText(text, 0, 0, font, size * 2)
+    local t = cache.newText(text, 0, 0, font, size * 2)
     referencePoints( t, rp ); displayMethods(t)
     t.xScale, t.yScale, t.x, t.y = .5, .5, xPos, yPos
     t.cachedTextColor = t.setTextColor
@@ -627,11 +627,11 @@ in which case simply pass in "false" when you creat your timer.
 
 helpArr.timer = 'timer.performWithDelay( delay, function [, repeats, omitFromCancelAll])'
 local timerArray = {}
-local cachedTimer = timer.performWithDelay
+cache.performWithDelay = timer.performWithDelay
 timer.performWithDelay = function( time, callback, repeats, add )
     local repeats, add = repeats, add
     if type(repeats) == "boolean" then add = repeats; repeats = nil end
-    local t = cachedTimer(time, callback, repeats)
+    local t = cache.performWithDelay(time, callback, repeats)
     if add ~= false then
         timerArray[#timerArray+1] = t
     end
@@ -640,8 +640,8 @@ end
 
 helpArr.cancelAll = 'timer.cancelAll()'
 timer.cancelAll = function()
-    for i=1, #timerArray do
-        timer.cancel(timerArray[i])
+    for i,v in ipairs(timerArray) do
+        timer.cancel(v)
     end
 end
 
@@ -667,10 +667,17 @@ a kind warning letting you know, but there be no error
 
 ]]
 
-local cachedTimerCancel = timer.cancel
-timer.cancel = function(t)
-    if t then cachedTimerCancel(t) else print("Whoops, that timer doesn't exist!") end
-end
+cache.timerCancel = timer.cancel
+timer.cancel = function(t) if t then cache.timerCancel(t) end end
+
+            --[[ ########## Transitions ########## ]--
+
+            to, from, cancel
+            multiple, safe, pause, resume, cancel
+            reverse, loop, bounce
+
+
+
 
             --[[ ########## Multiple Transition ########## ]--
 
@@ -811,13 +818,15 @@ popup. Now you won't need to build and install  to set it's position.
 
 ]]
 
-local cachedPopup, cachedCancelWeb, curPopup = native.showWebPopup, native.cancelWebPopup
+cache.showWebPopup, cache.cancelWebPopup = native.showWebPopup, native.cancelWebPopup
+local curPopup
 native.showWebPopup = function( x, y, w, h, url, params )
-    if not simulator then cachedPopup(x, y, w, h, url, params)
+    if not simulator then cache.showWebPopup(x, y, w, h, url, params)
     else curPopup = display.newRect(x, y, w, h); curPopup:setFillColor( 100, 100, 100 ) end
 end
+
 native.cancelWebPopup = function()
-    if curPopup then curPopup:removeSelf() else cachedCancelWeb() end
+    if curPopup and curPopup.removeSelf then curPopup:removeSelf() else cache.cancelWebPopup() end
 end
 
 
@@ -1053,15 +1062,15 @@ app anyway, but if you do this should help improve performance.
 
 ]]
 
-cachedPrint = print
+cache.print = print
 print = function( ... )
     local a = ...
     if simulator then
         if type(a) == "table" then
-            cachedPrint("\nOutput Table Data:\n")
-            for k,v in pairs(a) do cachedPrint("\tKey: "..k, "Value: ", v) end
-        elseif #{...} > 1 then cachedPrint("\nOutput mutiple: ", ...)
-        else cachedPrint("\nOutput "..type(a).." :: ", a or "") end
+            cache.print("\nOutput Table Data:\n")
+            for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
+        elseif #{...} > 1 then cache.print("\nOutput mutiple: ", ...)
+        else cache.print("\nOutput "..type(a).." :: ", a or "") end
     end
 end
 
@@ -1072,23 +1081,23 @@ List all features for quick reference
 ]]
 
 CSL.listFeatures = function()
-    cachedPrint("\nFeature List:\n")
-    cachedPrint("\n+ Global variables for dynamic resolution")
-    cachedPrint("\n+ Super simple saving and loading")
-    cachedPrint("\n+ Shortened reference points, passible as arguments to all display objects")
-    cachedPrint("\n+ Insert multiple objects into a group")
-    cachedPrint("\n+ Automatic retina-ready text")
-    cachedPrint("\n+ Paragraphs")
-    cachedPrint("\n+ Exposed API: timer.cancelAll()")
-    cachedPrint("\n+ Safe timer.cancel()")
-    cachedPrint("\n+ Crossfade background audio")
-    cachedPrint("\n+ Play SFX based on registered true/false variable")
-    cachedPrint("\n+ Simulator-friendly webPopups")
-    cachedPrint("\n+ Print installed font names with printFonts()")
-    cachedPrint("\n+ Initialize and globalize a font with one line")
-    cachedPrint("\n+ Execute a function if internet is detected, execute another if not connected")
-    cachedPrint("\n+ Global information handling")
-    cachedPrint("\n+ Extended print statement")
+    cache.print("\nFeature List:\n")
+    cache.print("\n+ Global variables for dynamic resolution")
+    cache.print("\n+ Super simple saving and loading")
+    cache.print("\n+ Shortened reference points, passible as arguments to all display objects")
+    cache.print("\n+ Insert multiple objects into a group")
+    cache.print("\n+ Automatic retina-ready text")
+    cache.print("\n+ Paragraphs")
+    cache.print("\n+ Exposed API: timer.cancelAll()")
+    cache.print("\n+ Safe timer.cancel()")
+    cache.print("\n+ Crossfade background audio")
+    cache.print("\n+ Play SFX based on registered true/false variable")
+    cache.print("\n+ Simulator-friendly webPopups")
+    cache.print("\n+ Print installed font names with printFonts()")
+    cache.print("\n+ Initialize and globalize a font with one line")
+    cache.print("\n+ Execute a function if internet is detected, execute another if not connected")
+    cache.print("\n+ Global information handling")
+    cache.print("\n+ Extended print statement")
 end
 
             --[[ ########## Startup Tips ########## ]--
@@ -1113,13 +1122,13 @@ local tipArray = {
     "Do you have a helpful Lua or CoronaSDK tip? Please send it to me and I'll include it in the library!"
 }
 local showTip = function()
-    cachedPrint("\n\nTip:\n\n\t"..tipArray[math.random(1,#tipArray)])
+    cache.print("\n\nTip:\n\n\t"..tipArray[math.random(1,#tipArray)])
 end
 
             --[[ ########## Welcome! ########## ]]--
 
 local welcome = function()
-    local print = cachedPrint
+    local print = cache.print
     print("\n\n\nYou can disable this welcome message by setting the 'showIntro' variable to\nfalse in crawlspacelib.lua")
     print("\n\n")
     print("CrawlSpaceLib v1.1.3\n")
