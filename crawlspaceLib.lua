@@ -1312,6 +1312,6 @@ CSL.printDebugger = function( event )
     elseif event.phase == "ended" then timer.cancel(debugTimer) end
 end
 
-Runtime:addEventListener("touch", CSL.printDebugger)
+if not simulator then Runtime:addEventListener("touch", CSL.printDebugger) end
 
 return CSL
