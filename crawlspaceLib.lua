@@ -678,7 +678,7 @@ timer.cancel = function(t) if t then cache.timerCancel(t) end end
 
 
 
-
+]]
             --[[ ########## Multiple Transition ########## ]--
 
 ]]
@@ -1051,6 +1051,20 @@ setVar = CSL.setVariable
 
 CSL.registerVariable{"volume", 1}
 CSL.registerVariable{"sfx", true}
+
+            --[[ ########## Extended Table Functions ########## ]--
+
+]]
+
+table.shuffle = function( a )
+    local r, c = math.random, #a
+    for i=1, (c * 20) do
+        local x, y = r(1,c), r(1,c)
+        a[x], a[y] = a[y], a[x]
+    end
+    return a
+end
+
 
             --[[ ########## Extended Print ########## ]--
 
