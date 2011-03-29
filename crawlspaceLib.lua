@@ -1065,6 +1065,12 @@ table.shuffle = function( a )
     return a
 end
 
+table.search = function( table, v )
+    for k,value in pairs(table) do
+        if v == value then return k end
+    end
+end
+
 
             --[[ ########## Extended Print ########## ]--
 
