@@ -41,6 +41,9 @@ local showIntro = false
 -- Set this to false to bypass the random Lua/CoronaSDK tips
 local startupTips = false
 
+-- Enable debug print messages, as well as on-device prints
+local debug = false
+
 
 
 -- CSL is the actual object returned
@@ -1312,6 +1315,6 @@ CSL.printDebugger = function( event )
     elseif event.phase == "ended" then timer.cancel(debugTimer) end
 end
 
-if not simulator then Runtime:addEventListener("touch", CSL.printDebugger) end
+if not simulator and debug then Runtime:addEventListener("touch", CSL.printDebugger) end
 
 return CSL
