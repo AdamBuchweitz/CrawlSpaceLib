@@ -571,7 +571,8 @@ display.newParagraph = function( string, width, params )
     local format; if type(params) == "number" then format={size = params} else format=params end
     local splitString, lineCache, tempString = split(string, " "), {}, ""
     for i=1, #splitString do
-        if #tempString + #splitString[i] > width then lineCache[#lineCache+1]=tempString; tempString=splitString[i].." "
+        if splitString[i] == "\n" then lineCache[#lineCache+1]=tempString; tempString=splitString[i]
+        elseif #tempString + #splitString[i] > width then lineCache[#lineCache+1]=tempString; tempString=splitString[i].." "
         else tempString = tempString..splitString[i].." " end
     end
     lineCache[#lineCache+1]=tempString
