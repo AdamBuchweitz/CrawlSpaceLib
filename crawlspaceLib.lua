@@ -42,7 +42,7 @@ local showIntro = false
 local startupTips = false
 
 -- Enable debug print messages, as well as on-device prints
-local debug = false
+local debug = true
 
 
 
@@ -1275,45 +1275,15 @@ elseif name == "win"       then platform.win     = true
 elseif name == "mac os x"  then platform.mac     = true end
 platform.name = name
 
+local debugUI
 local setupDebugger = function()
-    local g = display.newGroup()
-    local tapSpot = display.newGroup()
-    local checkPos = function( event )
-        if event.x < centerX - 40 then
-            tapSpot.x, tapSpot.y = centerX - 65, centerY
-            tapSpot.rotation = 0
-            tapSpot.state = 4
-        elseif event.x > centerX + 40 then
-            tapSpot.rotation = 0
-            tapSpot.x, tapSpot.y = centerX + 65, centerY
-            tapSpot.state = 2
-        end
-        if event.y > centerY + 40 then
-            tapSpot.x, tapSpot.y = centerX, centerY + 65
-            tapSpot.rotation = 90
-            tapSpot.state = 3
-        elseif event.y < centerY - 40 then
-            tapSpot.x, tapSpot.y = centerX, centerY - 65
-            tapSpot.rotation = 90
-            tapSpot.state = 1
-        end
+    if not debugUI then
+        debugUI = display.newGroup()
     end
-    g.touch = function( self, event )
-        local phase = event.phase
-        if phase == "began" then
-            checkPos(event)
-            display.getCurrentStage():setFocus( self )
-            tapSpot:fadeIn()
-        elseif phase == "moved" then
-            checkPos(event)
-        elseif phase == "ended" then
-            print(tapSpot.state)
-            tapSpot:fadeOut()
-            display.getCurrentStage():setFocus( nil )
-        end
-        return true
-    end
+    local g = debugUI
+    g.state = 0
 
+    -- background glow
     local b
     for i=1, 10 do
         b = display.newCircle( centerX, centerY, 111 - i )
@@ -1321,42 +1291,91 @@ local setupDebugger = function()
         g:insert(b)
     end
 
+    -- background circle
     local oc = display.newCircle( centerX, centerY, 100 )
     oc:setFillColor( 0, 0, 0 )
     oc.alpha = 0.85
 
+    -- inner circle
     local ic = display.newCircle( centerX, centerY, 30 )
     ic:setFillColor(0,0,0,0)
     ic.alpha = 0.25
     ic.strokeWidth = 1
     ic:setStrokeColor(255,255,255)
 
-    local lineGroup = display.newGroup()
-    lineGroup.x, lineGroup.y = centerX, centerY
-    local side = {0,-1,0,1}
+    -- make glows
+    local makeGlow = function()
+        local g = display.newGroup()
+        for i=1, 10 do
+            b = display.newCircle( 0, 0, 41 - i*3 )
+            b.alpha = i * 0.015
+            g:insert(b)
+        end
+        return g
+    end
 
-    local l
+    -- lines and glow groups
+    local lineGroup, glowGroup = display.newGroup(), display.newGroup()
+    lineGroup.x, lineGroup.y = centerX, centerY
+    lineGroup.rotation = 45
+    glowGroup.x, glowGroup.y = centerX, centerY
+
+    local side = {0,-1,0,1}
+    local side2 = {0,1,0,-1}
+    local abs, l, glow = math.abs
     for i=1, 4 do
         l = display.newLine(30, 0, 100, 0)
         l.x, l.y = 30*side[i], 30*side[5-i]
         l.alpha = 0.25
         l.rotation = 90*i
+        glow = makeGlow()
+        glow.x, glow.y = 65*side2[i], 65*side2[5-i]
+        glow.xScale, glow.yScale = 1-0.4*abs(side[i]), 1-0.4*abs(side[5-i])
+        glow.alpha = 0
+        glowGroup:insert(glow)
         lineGroup:insert(l)
     end
-    lineGroup.rotation = 45
 
-    for i=1, 10 do
-        b = display.newCircle( 0, 0, 41 - i*3 )
-        b.alpha = i * 0.015
-        tapSpot:insert(b)
+    local checkPos = function( event )
+        local newState = 0
+        if event.x < centerX - 40 then
+            newState = 4
+        elseif event.x > centerX + 40 then
+            newState = 2
+        end
+        if event.y > centerY + 40 then
+            newState = 3
+        elseif event.y < centerY - 40 then
+            newState = 1
+        end
+        if newState ~= g.state then
+            if g.state > 0 then
+                glowGroup[g.state]:fadeOut()
+            end
+            if newState > 0 then
+                glowGroup[newState]:fadeIn()
+            end
+            g.state = newState
+        end
+    end
+    g.touch = function( self, event )
+        local phase = event.phase
+        if phase == "began" then
+            checkPos(event)
+            display.getCurrentStage():setFocus( self )
+        elseif phase == "moved" then
+            checkPos(event)
+        elseif phase == "ended" then
+            display.getCurrentStage():setFocus( nil )
+            if g.state == 0 then
+                g:fadeOut()
+            end
+        end
+        return true
     end
 
-    tapSpot.x, tapSpot.y = centerX, centerY
-    tapSpot.xScale = 0.6
-    tapSpot.alpha = 0
-
     g:addEventListener("touch", g)
-    g:insert(oc, ic, lineGroup, tapSpot)
+    g:insert(oc, ic, lineGroup, glowGroup)
     g:fadeIn()
     return g
 end
