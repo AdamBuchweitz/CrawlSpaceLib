@@ -1093,7 +1093,7 @@ local printObj, printYpos
 cache.print = print
 print = function( ... )
     local a = ...
-    if simulator then
+    if not simulator then
         if type(a) == "table" then
             cache.print("\nOutput Table Data:\n")
             for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
@@ -1275,6 +1275,92 @@ elseif name == "win"       then platform.win     = true
 elseif name == "mac os x"  then platform.mac     = true end
 platform.name = name
 
+local setupDebugger = function()
+    local g = display.newGroup()
+    local tapSpot = display.newGroup()
+    local checkPos = function( event )
+        if event.x < centerX - 40 then
+            tapSpot.x, tapSpot.y = centerX - 65, centerY
+            tapSpot.rotation = 0
+            tapSpot.state = 4
+        elseif event.x > centerX + 40 then
+            tapSpot.rotation = 0
+            tapSpot.x, tapSpot.y = centerX + 65, centerY
+            tapSpot.state = 2
+        end
+        if event.y > centerY + 40 then
+            tapSpot.x, tapSpot.y = centerX, centerY + 65
+            tapSpot.rotation = 90
+            tapSpot.state = 3
+        elseif event.y < centerY - 40 then
+            tapSpot.x, tapSpot.y = centerX, centerY - 65
+            tapSpot.rotation = 90
+            tapSpot.state = 1
+        end
+    end
+    g.touch = function( self, event )
+        local phase = event.phase
+        if phase == "began" then
+            checkPos(event)
+            display.getCurrentStage():setFocus( self )
+            tapSpot:fadeIn()
+        elseif phase == "moved" then
+            checkPos(event)
+        elseif phase == "ended" then
+            print(tapSpot.state)
+            tapSpot:fadeOut()
+            display.getCurrentStage():setFocus( nil )
+        end
+        return true
+    end
+
+    local b
+    for i=1, 10 do
+        b = display.newCircle( centerX, centerY, 111 - i )
+        b.alpha = i * 0.03
+        g:insert(b)
+    end
+
+    local oc = display.newCircle( centerX, centerY, 100 )
+    oc:setFillColor( 0, 0, 0 )
+    oc.alpha = 0.85
+
+    local ic = display.newCircle( centerX, centerY, 30 )
+    ic:setFillColor(0,0,0,0)
+    ic.alpha = 0.25
+    ic.strokeWidth = 1
+    ic:setStrokeColor(255,255,255)
+
+    local lineGroup = display.newGroup()
+    lineGroup.x, lineGroup.y = centerX, centerY
+    local side = {0,-1,0,1}
+
+    local l
+    for i=1, 4 do
+        l = display.newLine(30, 0, 100, 0)
+        l.x, l.y = 30*side[i], 30*side[5-i]
+        l.alpha = 0.25
+        l.rotation = 90*i
+        lineGroup:insert(l)
+    end
+    lineGroup.rotation = 45
+
+    for i=1, 10 do
+        b = display.newCircle( 0, 0, 41 - i*3 )
+        b.alpha = i * 0.015
+        tapSpot:insert(b)
+    end
+
+    tapSpot.x, tapSpot.y = centerX, centerY
+    tapSpot.xScale = 0.6
+    tapSpot.alpha = 0
+
+    g:addEventListener("touch", g)
+    g:insert(oc, ic, lineGroup, tapSpot)
+    g:fadeIn()
+    return g
+end
+
 local debugTimer= nil
 local set = function()
     if CSL.debugWindow then
@@ -1307,15 +1393,17 @@ local set = function()
         CSL.debugWindow = debugWindow
         print(":: PRINT ::")
     end
+
+    local debugSelector = setupDebugger()
 end
 
 CSL.printDebugger = function( event )
     local event = event
     if event.phase == "began" then
-        debugTimer = timer.performWithDelay(5000, set)
+        debugTimer = timer.performWithDelay(1000, set)
     elseif event.phase == "ended" then timer.cancel(debugTimer) end
 end
 
-if not simulator and debug then Runtime:addEventListener("touch", CSL.printDebugger) end
+if debug then Runtime:addEventListener("touch", CSL.printDebugger) end
 
 return CSL
