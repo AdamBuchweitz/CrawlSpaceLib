@@ -577,7 +577,8 @@ display.newParagraph = function( string, width, params )
     local format; if type(params) == "number" then format={size = params} else format=params end
     local splitString, lineCache, tempString = split(string, " "), {}, ""
     for i=1, #splitString do
-        if #tempString + #splitString[i] > width then lineCache[#lineCache+1]=tempString; tempString=splitString[i].." "
+        if splitString[i] == "\n" then lineCache[#lineCache+1]=tempString; tempString=splitString[i]
+        elseif #tempString + #splitString[i] > width then lineCache[#lineCache+1]=tempString; tempString=splitString[i].." "
         else tempString = tempString..splitString[i].." " end
     end
     lineCache[#lineCache+1]=tempString
@@ -1103,7 +1104,7 @@ local printObj, printYpos
 cache.print = print
 print = function( ... )
     local a = ...
-    if simulator then
+    if not simulator then
         if type(a) == "table" then
             cache.print("\nOutput Table Data:\n")
             for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
@@ -1285,6 +1286,111 @@ elseif name == "win"       then platform.win     = true
 elseif name == "mac os x"  then platform.mac     = true end
 platform.name = name
 
+local debugUI
+local setupDebugger = function()
+    if not debugUI then
+        debugUI = display.newGroup()
+    end
+    local g = debugUI
+    g.state = 0
+
+    -- background glow
+    local b
+    for i=1, 10 do
+        b = display.newCircle( centerX, centerY, 111 - i )
+        b.alpha = i * 0.03
+        g:insert(b)
+    end
+
+    -- background circle
+    local oc = display.newCircle( centerX, centerY, 100 )
+    oc:setFillColor( 0, 0, 0 )
+    oc.alpha = 0.85
+
+    -- inner circle
+    local ic = display.newCircle( centerX, centerY, 30 )
+    ic:setFillColor(0,0,0,0)
+    ic.alpha = 0.25
+    ic.strokeWidth = 1
+    ic:setStrokeColor(255,255,255)
+
+    -- make glows
+    local makeGlow = function()
+        local g = display.newGroup()
+        for i=1, 10 do
+            b = display.newCircle( 0, 0, 41 - i*3 )
+            b.alpha = i * 0.015
+            g:insert(b)
+        end
+        return g
+    end
+
+    -- lines and glow groups
+    local lineGroup, glowGroup = display.newGroup(), display.newGroup()
+    lineGroup.x, lineGroup.y = centerX, centerY
+    lineGroup.rotation = 45
+    glowGroup.x, glowGroup.y = centerX, centerY
+
+    local side = {0,-1,0,1}
+    local side2 = {0,1,0,-1}
+    local abs, l, glow = math.abs
+    for i=1, 4 do
+        l = display.newLine(30, 0, 100, 0)
+        l.x, l.y = 30*side[i], 30*side[5-i]
+        l.alpha = 0.25
+        l.rotation = 90*i
+        glow = makeGlow()
+        glow.x, glow.y = 65*side2[i], 65*side2[5-i]
+        glow.xScale, glow.yScale = 1-0.4*abs(side[i]), 1-0.4*abs(side[5-i])
+        glow.alpha = 0
+        glowGroup:insert(glow)
+        lineGroup:insert(l)
+    end
+
+    local checkPos = function( event )
+        local newState = 0
+        if event.x < centerX - 40 then
+            newState = 4
+        elseif event.x > centerX + 40 then
+            newState = 2
+        end
+        if event.y > centerY + 40 then
+            newState = 3
+        elseif event.y < centerY - 40 then
+            newState = 1
+        end
+        if newState ~= g.state then
+            if g.state > 0 then
+                glowGroup[g.state]:fadeOut()
+            end
+            if newState > 0 then
+                glowGroup[newState]:fadeIn()
+            end
+            g.state = newState
+        end
+    end
+    g.touch = function( self, event )
+        local phase = event.phase
+        if phase == "began" then
+            checkPos(event)
+            display.getCurrentStage():setFocus( self )
+        elseif phase == "moved" then
+            checkPos(event)
+        elseif phase == "ended" then
+            display.getCurrentStage():setFocus( nil )
+            if g.state == 0 then
+                g:fadeOut()
+            end
+        end
+        return true
+    end
+
+    g:addEventListener("touch", g)
+    g:insert(oc, ic, lineGroup, glowGroup)
+    g:fadeIn()
+    return g
+end
+
 local debugTimer= nil
 local set = function()
     if CSL.debugWindow then
@@ -1317,15 +1423,17 @@ local set = function()
         CSL.debugWindow = debugWindow
         print(":: PRINT ::")
     end
+
+    local debugSelector = setupDebugger()
 end
 
 CSL.printDebugger = function( event )
     local event = event
     if event.phase == "began" then
-        debugTimer = timer.performWithDelay(5000, set)
+        debugTimer = timer.performWithDelay(1000, set)
     elseif event.phase == "ended" then timer.cancel(debugTimer) end
 end
 
-if not simulator and debug then Runtime:addEventListener("touch", CSL.printDebugger) end
+if debug then Runtime:addEventListener("touch", CSL.printDebugger) end
 
 return CSL
