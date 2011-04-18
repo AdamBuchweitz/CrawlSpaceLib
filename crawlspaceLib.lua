@@ -42,7 +42,7 @@ local showIntro = false
 local startupTips = false
 
 -- Enable debug print messages, as well as on-device prints
-local debug = false
+local debug = true
 
 
 
@@ -461,8 +461,14 @@ it's reference point.
 helpArr.newImageRect = 'display.newImage(filename [, width, height, referencePoint])\n\n\tNote that width and height values are defaulted to 380 and 570 respectively. These values corrospond to the "magic formula" commonly used to dynamic resolutions.'
 helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referencePoint])'
 cache.newImageRect = display.newImageRect
-display.newImageRect = function( path, w, h, rp )
-    local i = cache.newImageRect( path, w or 380, h or 570 )
+display.newImageRect = function( path, baseDir, w, h, rp )
+    local baseDir, w, h, rp, i = baseDir, w, h, rp
+    if type(baseDir) == "userdata" then
+        i = cache.newImageRect( path, baseDir, w or 380, h or 570 )
+    else
+        w, h, rp = baseDir, w, h
+        i = cache.newImageRect( path, w or 380, h or 570 )
+    end
     if referencePoints( i, rp ) then displayMethods( i ) end
     return i
 end
@@ -885,7 +891,7 @@ crossPlatformFilename = function( filename, iosSuffix, androidSuffix )
     elseif not androidSuffix then
         error("You must supply a suffix for Android", 2)
     end
-    if system.isAndroid then
+    if platform.mac or platform.android then
         _G[filename] = filename..androidSuffix
     else
         _G[filename] = filename..iosSuffix
@@ -950,16 +956,21 @@ so access it during the first few seconds of launch.
 
 helpArr.executeIfInternet = 'executeIfInternet(myInternetMethod, myNonInternetMethod)'
 local toExecute = {}
+local checkForInternet
 local executeOnNet = function()
     for i=1, #toExecute do local f = table.remove(toExecute); f(); f=nil end
 end
 -- Sets global variable "internet"
 local internetListener = function( event )
-    if event.isError then _G.internet = false
+    if event.isError then _G.internet = false; timer.performWithDelay(30000, checkForInternet, false)
     else _G.internet = true; executeOnNet() end
     return true
 end
-network.request("http://google.com/", "GET", internetListener)
+
+checkForInternet = function()
+    network.request("http://google.com/", "GET", internetListener)
+end
+checkForInternet()
 
 executeIfInternet = function(f)
     if internet then f(); return true
