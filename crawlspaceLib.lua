@@ -1456,7 +1456,6 @@ local showPrints = function()
 end
 
 
-local debugUI
 local showDialog = function()
     local makeDebugUI = function()
         local g = display.newGroup()
@@ -1526,11 +1525,6 @@ local showDialog = function()
             elseif event.y < centerY - 40 then
                 newState = 1
             end
-            if newState ~= debugUI.state then
-                --if debugUI.state > 0 then
-                    --glowGroup[debugUI.state]:fadeOut()
-                --end
-            end
             if newState > 0 then
                 local glo = glowGroup[newState]
                 if glo.on then
@@ -1543,7 +1537,7 @@ local showDialog = function()
             end
             debugUI.state = newState
         end
-        g.functions = { showFPS, nil, showVars, showPrints }
+        g.functions = { showFPS, function()end, showVars, showPrints }
         g.touch = function( self, event )
             local phase = event.phase
             if phase == "began" then
@@ -1555,6 +1549,9 @@ local showDialog = function()
                 display.getCurrentStage():setFocus( nil )
                 if g.state > 0 then
                     g.functions[g.state]()
+                    if g.state == 3 then
+                        glowGroup[g.state]:fadeOut()
+                    end
                 elseif g.canClose then
                     g:fadeOut()
                 else
@@ -1584,10 +1581,11 @@ end
 
 local debugTimer
 local debugger = function()
+    DebugVar("debugTime", {1000, 10000}, 1000, "Debug Timer")
     local listener = function( event )
         local phase = event.phase
         if phase == "began" then
-            debugTimer = timer.performWithDelay(1000, showDialog )
+            debugTimer = timer.performWithDelay(CSL.retrieveVariable("debugTime"), showDialog )
         elseif phase == "ended" then timer.cancel(debugTimer) end
     end
     Runtime:addEventListener("touch", listener)
