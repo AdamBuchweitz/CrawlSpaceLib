@@ -1104,7 +1104,7 @@ local printObj, printYpos
 cache.print = print
 print = function( ... )
     local a = ...
-    if not simulator then
+    if simulator then
         if type(a) == "table" then
             cache.print("\nOutput Table Data:\n")
             for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
@@ -1285,6 +1285,8 @@ elseif name == "mac os x"  then platform.mac     = true end
 platform.name = name
 
 
+
+local debugUI
 
 local prevTime = 0;
 local maxSavedFps = 30;
