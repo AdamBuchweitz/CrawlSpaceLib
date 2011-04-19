@@ -1296,9 +1296,6 @@ local function minElement(table)
     return min;
 end
 
-local function getLabelUpdater(self)
-end
-
 local fpsDialog
 local showFPS = function()
     local makeFpsDialog = function()
@@ -1323,12 +1320,13 @@ local showFPS = function()
 
     local lastFps = {}
     local lastFpsCounter = 1
+    local floor, ceil = math.floor, math.ceil
     local updateFPS = function( event )
         local curTime = system.getTimer();
         local dt = curTime - prevTime;
         prevTime = curTime;
 
-        local fps = math.floor(1000/dt);
+        local fps = floor(1000/dt);
 
         lastFps[lastFpsCounter] = fps;
         lastFpsCounter = lastFpsCounter + 1;
@@ -1337,26 +1335,90 @@ local showFPS = function()
 
         fpsDialog.framerate.text = "FPS: "..fps.." (min: "..minLastFps..")";
 
-        local mem = math.ceil(system.getInfo("textureMemoryUsed")*.0001)*.01
+        local mem = ceil(system.getInfo("textureMemoryUsed")*.0001)*.01
         fpsDialog.memory.text = "Mem: "..mem.." mb";
     end
 
     if fpsDialog then
-        if fpsDialog.y == screenY then
-            transition.to(fpsDialog, {time=200, y=screenY-50})
-            Runtime:removeEventListener("enterFrame", updateFPS)
-        else
-            transition.to(fpsDialog, {time=200, y=screenY})
-            Runtime:addEventListener("enterFrame", updateFPS)
-        end
+        if fpsDialog.y == screenY then transition.to(fpsDialog, {time=200, y=screenY-50})
+        else transition.to(fpsDialog, {time=200, y=screenY}) end
     else
         fpsDialog = makeFpsDialog()
         Runtime:addEventListener("enterFrame", updateFPS)
     end
 end
 
+local debugVars = {}
+DebugVar = function( var, range, value, title )
+    CSL.registerVariable{ var, value }
+    local v = {}
+    v.ref = var
+    v.value = value
+    v.min = range[1]
+    v.max = range[2]
+    v.unit = (v.max - v.min) * 0.01
+    v.title = title
+    v.callback = function( event )
+        CSL.setVariable{ v.ref, event.value * v.unit, true}
+    end
+    debugVars[#debugVars+1] = v
+end
+
+local coronaui = require( "coronaui" )
+local varAdjusterUI
 local showVars = function()
-    print("vars")
+    local pValue = function(event)
+    end
+    local makeVarAdjusterUI = function()
+        local g = display.newGroup()
+        g.hit = display.newRect( centerX, centerY, screenWidth, screenHeight, "c" )
+        g.hit.alpha = 0.25
+        g.hit.remove = true
+
+        local bg = display.newRoundedRect( centerX, centerY, screenWidth*0.8, 10+#debugVars*60, 20, "c" )
+        bg:setFillColor(0,0,0,200)
+        bg:addEventListener("touch", g)
+
+        local bgOutline = display.newRoundedRect( centerX, centerY, screenWidth*0.8+4, 14+#debugVars*60, 20, "c" )
+        bgOutline.strokeWidth = 1
+        bgOutline:setFillColor(0,0,0,0)
+        bgOutline:setStrokeColor(200,200,200,200)
+
+        g:insert(g.hit, bg, bgOutline)
+
+        local yPos = centerY - bgOutline.contentHeight * 0.5
+        for i, v in ipairs(debugVars) do
+            local txt = display.newText(v.title or v.ref, 0, yPos-30+55*i, native.systemFont, 14, "cl")
+            local sld = coronaui.newSliderControl( centerX, txt.y+23, v.value/v.unit, v.callback)
+            sld.name = "slider"
+            txt.x = centerX - sld.contentWidth*0.25+ 10
+            g:insert(txt, sld)
+        end
+
+        g:fadeIn()
+
+        g.touch = function( self, event )
+            if event.target.remove then
+                varAdjusterUI:fadeOut(250)
+            end
+            return true
+        end
+
+        return g
+    end
+
+    if varAdjusterUI then
+        if varAdjusterUI.alpha > 0.5 then
+            varAdjusterUI:fadeOut(250)
+            varAdjusterUI.hit:removeEventListener("touch", varAdjusterUI)
+        else
+            varAdjusterUI:fadeIn(250)
+            varAdjusterUI.hit:addEventListener("touch", varAdjusterUI)
+        end
+    else
+        varAdjusterUI = makeVarAdjusterUI()
+        varAdjusterUI.hit:addEventListener("touch", varAdjusterUI)
+    end
 end
 
 local showPrints = function()
