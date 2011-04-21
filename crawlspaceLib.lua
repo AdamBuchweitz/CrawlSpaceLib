@@ -1364,11 +1364,9 @@ DebugVar = function( var, range, value, title )
     debugVars[#debugVars+1] = v
 end
 
-local coronaui = require( "coronaui" )
+local coronaui
 local varAdjusterUI
 local showVars = function()
-    local pValue = function(event)
-    end
     local makeVarAdjusterUI = function()
         local g = display.newGroup()
         g.hit = display.newRect( centerX, centerY, screenWidth, screenHeight, "c" )
@@ -1416,6 +1414,7 @@ local showVars = function()
             varAdjusterUI.hit:addEventListener("touch", varAdjusterUI)
         end
     else
+        coronaui = require("coronaui")
         varAdjusterUI = makeVarAdjusterUI()
         varAdjusterUI.hit:addEventListener("touch", varAdjusterUI)
     end
