@@ -143,6 +143,7 @@ returns the table.
 
 helpArr.Save = 'Save(table [, filename])'
 helpArr.save = 'Did you mean "Save" ?'
+local tonum = tonumber
 local split = function(str, pat)
     local t = {}
     local fpat = "(.-)" .. pat
@@ -166,7 +167,13 @@ Save = function(table, fileName)
 
     if not table then table = Data end
     for k,v in pairs( table ) do
-        file:write( k .. "=" .. tostring(v) .. "," )
+        if type(v) == "table" then
+            for k2,v2 in pairs( v ) do
+                file:write( k .. ":" .. k2 .. "=" .. tostring(v2) .. "," )
+            end
+        else
+            file:write( k .. "=" .. tostring(v) .. "," )
+        end
     end
 
     io.close( file )
@@ -183,11 +190,21 @@ Load = function(fileName)
         local datavars = split(dataStr, ",")
         dataTableNew = {}
 
-        for i = 1, #datavars do
-            local onevalue = split(datavars[i], "=")
-            dataTableNew[onevalue[1]] = onevalue[2]
-            if (onevalue[2] == "true") then dataTableNew[onevalue[1]] = true
-            elseif (onevalue[2] == "false") then dataTableNew[onevalue[1]] = false end
+        for k,v in pairs(datavars) do
+            if string.find(tostring(v),":") then
+                local table = split(v, ":")
+                local pair = split(table[2], "=")
+                if pair[2] == "true" then pair[2] = true
+                elseif pair[2] == "false" then pair[2] = false
+                elseif tonum(pair[2]) then pair[2] = tonum(pair[2]) end
+                dataTableNew[k] = {}
+                dataTableNew[k][pair[1]] = pair[2]
+            else
+                local pair = split(v, "=")
+                dataTableNew[pair[1]] = pair[2]
+                if (pair[2] == "true") then dataTableNew[pair[1]] = true
+                elseif (pair[2] == "false") then dataTableNew[pair[1]] = false end
+            end
         end
 
         io.close( file ) -- important!
@@ -276,7 +293,7 @@ local crawlspaceFillColor = function(self,r,g,b,a)
     if type(r) == "string" then
         r = string.lower(string.gsub(r,"#",""))
         local hex = {}; string.gsub(r,".",function(v) hex[#hex+1] = v end)
-        for i=1, #hex do if not tonumber(hex[i]) then hex[i]=hexTable[hex[i]] end end
+        for i=1, #hex do if not tonum(hex[i]) then hex[i]=hexTable[hex[i]] end end
         r,g,b,a = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6],( hex[7] or 0 )*( hex[8] or 0 )
     end
     self:cachedFillColor(r,g,b,a or 255)
@@ -516,7 +533,7 @@ local crawlspaceTextColor = function(self,r,g,b)
     if type(r) == "string" then
         r = string.lower(string.gsub(r,"#",""))
         local hex = {}; string.gsub(r,".",function(a) hex[#hex+1] = a end)
-        for i=1, #hex do if not tonumber(hex[i]) then hex[i]=hexTable[hex[i]] end end
+        for i=1, #hex do if not tonum(hex[i]) then hex[i]=hexTable[hex[i]] end end
         r,g,b = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6]
     end
     self:cachedTextColor(r,g,b)
@@ -1048,7 +1065,7 @@ registerBulk = CSL.registerBulk
 CSL.retrieveVariable = function(...)
     local name, name2 = ...; name = name2 or name
     local var = CSL.registeredVariables[name]
-    if tonumber(var) then var = tonumber(var) end
+    if tonum(var) then var = tonum(var) end
     return var
 end
 getVar = CSL.retrieveVariable
@@ -1232,7 +1249,7 @@ local enableOF = function( params )
 end
 Achieve = function( achievement )
     --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to unlock and achievement."); return false end
-    if tonumber(achievement) then
+    if tonum(achievement) then
         if #tostring(achievement) ~= 6 then print("Invalid achievement number")
         else cache.require("openfeint").unlockAchievement(tostring(achievement)) end
     else
@@ -1248,7 +1265,7 @@ end
 HighScore = function( board, score, display )
     --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to submit a High Score."); return false end
     local board = board
-    if tonumber(board) then
+    if tonum(board) then
         if #tostring(board) ~= 6 then print("Invalid leaderboard number"); return false end
     else
         if leaderboards then
@@ -1259,7 +1276,7 @@ HighScore = function( board, score, display )
             else print("Cannot find that leaderboard"); return false end
         end
     end
-    cache.require("openfeint").setHighScore( { leaderboardID=tostring(board), score=tonumber(score), displayText=tostring(display)} )
+    cache.require("openfeint").setHighScore( { leaderboardID=tostring(board), score=tonum(score), displayText=tostring(display)} )
     --openfeint.setHighScore( { leaderboardID=boards[board], score=curBest, displayText=bestScore.text} )
 end
 
