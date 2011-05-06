@@ -188,7 +188,7 @@ Load = function(fileName)
     if file then
         local dataStr = file:read( "*a" )
         local datavars = split(dataStr, ",")
-        dataTableNew = {}
+        local dataTableNew = {}
 
         for k,v in pairs(datavars) do
             if string.find(tostring(v),":") then
@@ -197,21 +197,20 @@ Load = function(fileName)
                 if pair[2] == "true" then pair[2] = true
                 elseif pair[2] == "false" then pair[2] = false
                 elseif tonum(pair[2]) then pair[2] = tonum(pair[2]) end
-                dataTableNew[k] = {}
-                dataTableNew[k][pair[1]] = pair[2]
+                if not dataTableNew[tonum(table[1])] then dataTableNew[tonum(table[1])] = {} end
+                dataTableNew[tonum(table[1])][pair[1]] = pair[2]
             else
                 local pair = split(v, "=")
+                if pair[2] == "true" then pair[2] = true
+                elseif pair[2] == "false" then pair[2] = false
+                elseif tonum(pair[2]) then pair[2] = tonum(pair[2]) end
                 dataTableNew[pair[1]] = pair[2]
-                if (pair[2] == "true") then dataTableNew[pair[1]] = true
-                elseif (pair[2] == "false") then dataTableNew[pair[1]] = false end
             end
         end
 
         io.close( file ) -- important!
         if not fileName then
-            for k,v in pairs(dataTableNew) do
-                Data[k] = v
-            end
+            for k,v in pairs(dataTableNew) do Data[k] = v end
         end
         return dataTableNew
     else
