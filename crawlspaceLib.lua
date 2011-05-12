@@ -655,8 +655,8 @@ end
 
 helpArr.cancelAll = 'timer.cancelAll()'
 timer.cancelAll = function()
-    for i,v in ipairs(timerArray) do
-        timer.cancel(v)
+    while #timerArray > 0 do
+        timer.cancel(table.remove(timerArray,1))
     end
 end
 
