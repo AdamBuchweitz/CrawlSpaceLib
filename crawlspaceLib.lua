@@ -1285,7 +1285,10 @@ local enableFlurry = function( id )
     if not id then print("Please supply a valid app ID")
     else analytics.init(id) end
 end
-Log = function()
+
+Log = function( event )
+    if not package.loaded["analytics"] then print("Please Enable Analytics before attempting to log an event."); return false end
+    analytics.logEvent( event )
 end
 
 
