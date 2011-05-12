@@ -1111,6 +1111,7 @@ print = function( ... )
             cache.print("\nOutput Table Data:\n")
             for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
         elseif #{...} > 1 then cache.print("\nOutput mutiple: ", ...)
+        elseif a == "fonts" then printFonts()
         else cache.print("\nOutput "..type(a).." :: ", a or "") end
     else
         if CSL.printWindow then
