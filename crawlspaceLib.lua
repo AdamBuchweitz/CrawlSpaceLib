@@ -1594,7 +1594,7 @@ end
 
 
 local libraryMethods = { openfeint = enableOF, analytics = enableFlurry, debug = debugger }
-local libraryWhitelist = {"audio"}
+local libraryWhitelist = {"audio", "math", "string", "table" }
 local checkWhitelist = function(toCheck)
     for i,v in ipairs(libraryWhitelist) do if toCheck == v then return true end end
     return false
