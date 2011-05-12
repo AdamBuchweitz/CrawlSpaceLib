@@ -1602,16 +1602,21 @@ end
 
             --[[ ########## The actual method ########## ]]--
 Enable = function(library, params)
-    local l
-    if package.preload[ library ] then l=cache.require(library)
-    elseif checkWhitelist(library) then l=cache.require(library)
-    elseif system.pathForFile(library..".lua", package.path ) then l=cache.require(library)
-    else print("The library: "..library.." was not found. Please check your spelling.") end
-    if package.loaded[library] then
-        if libraryMethods[library] then libraryMethods[library](params) end
-        return l
+    if simulator then
+        if string.lower(library) == "crawlspacelib" then return CSL end
+        local l
+        if package.preload[ library ] then l=cache.require(library)
+        elseif checkWhitelist(library) then l=cache.require(library)
+        elseif system.pathForFile(library..".lua", package.path ) then l=cache.require(library)
+        else print("The library: "..library.." was not found. Please check your spelling.") end
+        if package.loaded[library] then
+            if libraryMethods[library] then libraryMethods[library](params) end
+            return l
+        end
+    else
+        return cache.require(library)
     end
 end
-if simulator then require = Enable end
+require = Enable
 
 return CSL
