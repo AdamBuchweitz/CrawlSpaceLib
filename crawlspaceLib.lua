@@ -222,6 +222,7 @@ end
 Defaults = function(d)
     for k,v in pairs(d) do
         Data[k] = v
+        setVar{ k, v }
     end
 end
 Data = {}
