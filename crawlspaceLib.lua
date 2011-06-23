@@ -210,7 +210,7 @@ Load = function(fileName)
 
         io.close( file ) -- important!
         if not fileName then
-            for k,v in pairs(dataTableNew) do Data[k] = v end
+            for k,v in pairs(dataTableNew) do Data[k] = v; setVar{k,v,true} end
         end
         return dataTableNew
     else
@@ -1078,10 +1078,12 @@ CSL.setVariable = function(...)
         else
             CSL.registeredVariables[new[1]] = CSL.registeredVariables[new[1]] + new[2]
             if new[3] then CSL.registeredVariables[new[1]] = new[2] end
+            if Data[new[1]] then Data[new[1]] = CSL.registeredVariables[new[1]] end
         end
     else
         if new[2] == "true" then new[2] = true elseif new[2] == "false" then new[2] = false end
         CSL.registeredVariables[new[1]] = new[2]
+        if Data[new[1]] then Data[new[1]] = CSL.registeredVariables[new[1]] end
     end
 end
 setVar = CSL.setVariable
