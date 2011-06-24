@@ -17,7 +17,7 @@
 
 
     Copyright (C) 2011 Crawl Space Games - All Rights Reserved
-
+    Library is MIT licensed. More info at: http://crawlspacegames.com/license
 
     All functionality is documented below. For syntax help use .help()
 
@@ -1249,6 +1249,7 @@ local enableOF = function( params )
 end
 Achieve = function( achievement )
     --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to unlock and achievement."); return false end
+    if not platform.ios then return true end
     if tonum(achievement) then
         if #tostring(achievement) ~= 6 then print("Invalid achievement number")
         else cache.require("openfeint").unlockAchievement(tostring(achievement)) end
@@ -1264,6 +1265,7 @@ Achieve = function( achievement )
 end
 HighScore = function( board, score, display )
     --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to submit a High Score."); return false end
+    if not platform.ios then return true end
     local board = board
     if tonum(board) then
         if #tostring(board) ~= 6 then print("Invalid leaderboard number"); return false end
@@ -1614,7 +1616,7 @@ end
 
 
 local libraryMethods = { openfeint = enableOF, analytics = enableFlurry, debug = debugger }
-local libraryWhitelist = {"audio", "math", "string", "table" }
+local libraryWhitelist = {"audio", "math", "string", "table", "debug" }
 local checkWhitelist = function(toCheck)
     for i,v in ipairs(libraryWhitelist) do if toCheck == v then return true end end
     return false
