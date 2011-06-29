@@ -306,7 +306,7 @@ local displayMethods = function( obj )
     d.center = function(self,axis) if axis == "x" then d.x=centerX elseif axis == "y" then d.y=centerY else d.x,d.y=centerX,centerY end end
     d.fader={}
     d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
-    d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() d:removeSelf() end elseif autoRemove then d.callback = function() callback(); d:removeSelf() end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
+    d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() display.remove(d) end elseif autoRemove then d.callback = function() callback(); display.remove(d) end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
     if d.setFillColor then d.cachedFillColor = d.setFillColor; d.setFillColor = crawlspaceFillColor end
 end
 
@@ -858,7 +858,7 @@ native.showWebPopup = function( x, y, w, h, url, params )
 end
 
 native.cancelWebPopup = function()
-    if curPopup and curPopup.removeSelf then curPopup:removeSelf() else cache.cancelWebPopup() end
+    if curPopup and curPopup.removeSelf then display.remove(curPopup) else cache.cancelWebPopup() end
 end
 
 
