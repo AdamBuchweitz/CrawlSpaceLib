@@ -784,7 +784,7 @@ audio.crossFadeBackground = function( path )
     if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
     audio.fadeOut({channel=audioChannel, time=500})
     if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
-    audio.setVolume( CSL.retrieveVariable("volume"), {audioChannel})
+    audio.setVolume( CSL.retrieveVariable("volume"), {channel=audioChannel})
     curAudio = audio.loadStream( musicPath )
     audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
     prevAudio = curAudio
