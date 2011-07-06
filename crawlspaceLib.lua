@@ -294,7 +294,7 @@ local crawlspaceFillColor = function(self,r,g,b,a)
         r = string.lower(string.gsub(r,"#",""))
         local hex = {}; string.gsub(r,".",function(v) hex[#hex+1] = v end)
         for i=1, #hex do if not tonum(hex[i]) then hex[i]=hexTable[hex[i]] end end
-        r,g,b,a = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6],( hex[7] or 0 )*( hex[8] or 0 )
+        r,g,b,a = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6],( hex[7] or 16 )*( hex[8] or 16 ) - 1
     end
     self:cachedFillColor(r,g,b,a or 255)
 end
