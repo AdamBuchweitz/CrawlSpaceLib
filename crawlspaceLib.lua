@@ -306,7 +306,7 @@ local displayMethods = function( obj )
     d.center = function(self,axis) if axis == "x" then d.x=centerX elseif axis == "y" then d.y=centerY else d.x,d.y=centerX,centerY end end
     d.fader={}
     d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
-    d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() display.remove(d) end elseif autoRemove then d.callback = function() callback(); display.remove(d) end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
+    d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() display.remove(d) end elseif autoRemove then d.callback = function() callback(); display.remove(d); d=nil end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
     if d.setFillColor then d.cachedFillColor = d.setFillColor; d.setFillColor = crawlspaceFillColor end
 end
 
@@ -784,7 +784,7 @@ audio.crossFadeBackground = function( path )
     if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
     audio.fadeOut({channel=audioChannel, time=500})
     if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
-    audio.setVolume( CSL.retrieveVariable("volume"), {audioChannel})
+    audio.setVolume( CSL.retrieveVariable("volume"), {channel=audioChannel})
     curAudio = audio.loadStream( musicPath )
     audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
     prevAudio = curAudio
