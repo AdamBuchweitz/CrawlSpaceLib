@@ -302,7 +302,7 @@ end
 local tranc = transition.cancel
 local displayMethods = function( obj )
     local d = obj
-    d.setPos = function(self,x,y) d.x, i.y = screenX+x, screenY+y end
+    d.setPos = function(self,x,y) d.x, d.y = screenX+x, screenY+y end
     d.center = function(self,axis) if axis == "x" then d.x=centerX elseif axis == "y" then d.y=centerY else d.x,d.y=centerX,centerY end end
     d.fader={}
     d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
