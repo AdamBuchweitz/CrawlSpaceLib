@@ -1236,39 +1236,41 @@ if showIntro then welcome() elseif startupTips then showTip() end
 cache.require = require
 
             --[[ ########## Open Feint Expansion ########## ]]--
-local achievements, leaderboards, openfeint
+local achievements, leaderboards, gameNetwork
 local enableOF = function( params )
-    openfeint = cache.require("openfeint")
+    gameNetwork = cache.require("gameNetwork")
     if not params then print("Please provide me with Open Feint info"); return false else
         if not params.productKey    then print("Missing Open Feint product key") end
         if not params.productSecret then print("Missing Open Feint product secret") end
         if not params.displayName   then print("Missing Open Feint display name") end
         if not params.appId         then print("Missing Open Feint app ID") end
     end
-    openfeint.init(params.productKey,params.productSecret,params.displayName,params.appId)
+    gameNetwork.init("openfeint",params.productKey,params.productSecret,params.displayName,params.appId)
     --if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards end
     local feint = cache.require("feint") -- external library
     achievements, leaderboards = feint.achievements, feint.leaderboards
+
+    openfeint.launchDashboard = gameNetwork.show
 end
+
 Achieve = function( achievement )
-    --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to unlock and achievement."); return false end
-    if not platform.ios then return true end
+    --if not package.loaded["gameNetwork"] then print("Please Enable gameNetwork before attempting to unlock and achievement."); return false end
     if tonum(achievement) then
         if #tostring(achievement) ~= 6 then print("Invalid achievement number")
-        else cache.require("openfeint").unlockAchievement(tostring(achievement)) end
+        else gameNetwork.request("unlockAchievement",tostring(achievement)) end
     else
         if achievements then
-            if achievements[achievement] then cache.require("openfeint").unlockAchievement(tostring(achievements[achievement]))
+            if achievements[achievement] then gameNetwork.request("unlockAchievement",tostring(achievements[achievement]))
             else print("Cannot find that achievement") end
         else
-            if _G.achievements and _G.achievements[achievement] then cache.require("openfeint").unlockAchievement(tostring(_G.achievements[achievement]))
+            if _G.achievements and _G.achievements[achievement] then gameNetwork.request("unlockAchievement",tostring(_G.achievements[achievement]))
             else print("Cannot find that achievement") end
         end
     end
 end
+
 HighScore = function( board, score, display )
-    --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to submit a High Score."); return false end
-    if not platform.ios then return true end
+    --if not package.loaded["gameNetwork"] then print("Please Enable gameNetwork before attempting to submit a High Score."); return false end
     local board = board
     if tonum(board) then
         if #tostring(board) ~= 6 then print("Invalid leaderboard number"); return false end
@@ -1281,8 +1283,7 @@ HighScore = function( board, score, display )
             else print("Cannot find that leaderboard"); return false end
         end
     end
-    cache.require("openfeint").setHighScore( { leaderboardID=tostring(board), score=tonum(score), displayText=tostring(display)} )
-    --openfeint.setHighScore( { leaderboardID=boards[board], score=curBest, displayText=bestScore.text} )
+    gameNetwork.request("setHighScore", { leaderboardID=tostring(board), score=tonum(score), displayText=tostring(display)})
 end
 
             --[[ ########## Flurry Expansion ########## ]]--
@@ -1618,7 +1619,7 @@ local debugger = function()
 end
 
 
-local libraryMethods = { openfeint = enableOF, analytics = enableFlurry, debug = debugger }
+local libraryMethods = { gameNetwork = enableOF, openfeint = enableOF, analytics = enableFlurry, debug = debugger }
 local libraryWhitelist = {"audio", "math", "string", "table", "debug" }
 local checkWhitelist = function(toCheck)
     for i,v in ipairs(libraryWhitelist) do if toCheck == v then return true end end
