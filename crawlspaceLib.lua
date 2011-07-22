@@ -1261,12 +1261,13 @@ local enableOF = function( params )
         if not params.displayName   then print("Missing Open Feint display name") end
         if not params.appId         then print("Missing Open Feint app ID") end
     end
-    gameNetwork.init("openfeint",params.productKey,params.productSecret,params.displayName,params.appId)
-    --if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards end
-    local feint = cache.require("feint") -- external library
-    achievements, leaderboards = feint.achievements, feint.leaderboards
-
+    openfeint = {}
     openfeint.launchDashboard = gameNetwork.show
+    gameNetwork.init("openfeint",params.productKey,params.productSecret,params.displayName,params.appId)
+    if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards end
+    --local feint = cache.require("feint") -- external library
+    --achievements, leaderboards = feint.achievements, feint.leaderboards
+
 end
 
 Achieve = function( achievement )
