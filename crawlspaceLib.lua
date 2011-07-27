@@ -1152,7 +1152,7 @@ print = function( ... )
     if simulator then
         if type(a) == "table" then
             cache.print("\nOutput Table Data:\n")
-            for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
+            for k,v in pairs(a) do cache.print("\tKey: "..tostring(k), "Value: ", tostring(v)) end
         elseif #{...} > 1 then cache.print("\nOutput mutiple: ", ...)
         elseif a == "fonts" then printFonts()
         else cache.print("\nOutput "..type(a).." :: ", a or "") end
