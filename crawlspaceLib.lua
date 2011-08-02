@@ -168,6 +168,7 @@ local split = function(str, pat)
     end
     return t
 end
+string.split = split
 
 Save = function(table, fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
