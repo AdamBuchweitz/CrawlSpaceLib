@@ -154,7 +154,7 @@ helpArr.save = 'Did you mean "Save" ?'
 local tonum = tonumber
 local split = function(str, pat)
     local t = {}
-    local fpat = "(.-)" .. pat
+    local fpat = "(.-)" .. (pat or " ")
     local last_end = 1
     local s, e, cap = str:find(fpat, 1)
     while s do
