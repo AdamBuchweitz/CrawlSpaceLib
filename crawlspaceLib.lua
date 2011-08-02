@@ -174,8 +174,7 @@ Save = function(table, fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "w" )
 
-    if not table then table = Data end
-    for k,v in pairs( table ) do
+    for k,v in pairs( table or Data ) do
         if type(v) == "table" then
             for k2,v2 in pairs( v ) do
                 file:write( k .. ":" .. k2 .. "=" .. tostring(v2) .. "," )
