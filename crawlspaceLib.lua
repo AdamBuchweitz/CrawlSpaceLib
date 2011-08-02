@@ -1273,7 +1273,7 @@ local enableOF = function( params )
     openfeint = {}
     openfeint.launchDashboard = gameNetwork.show
     gameNetwork.init("openfeint",params.productKey,params.productSecret,params.displayName,params.appId)
-    if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards end
+    if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards; openfeint.leaderboards, openfeint.achievements = leaderboards, achievements end
     --local feint = cache.require("feint") -- external library
     --achievements, leaderboards = feint.achievements, feint.leaderboards
 
