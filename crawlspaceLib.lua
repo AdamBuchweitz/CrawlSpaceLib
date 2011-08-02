@@ -1108,7 +1108,7 @@ CSL.setVariable = function(...)
     else
         if new[2] == "true" then new[2] = true elseif new[2] == "false" then new[2] = false end
         CSL.registeredVariables[new[1]] = new[2]
-        if Data[new[1]] then Data[new[1]] = CSL.registeredVariables[new[1]] end
+        if Data[new[1]] ~= nil then Data[new[1]] = CSL.registeredVariables[new[1]] end
     end
 end
 setVar = CSL.setVariable
