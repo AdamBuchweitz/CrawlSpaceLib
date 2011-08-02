@@ -1113,8 +1113,9 @@ CSL.setVariable = function(...)
 end
 setVar = CSL.setVariable
 
-CSL.registerVariable{"volume", 1}
-CSL.registerVariable{"sfx", true}
+CSL.setVariable{"volume", 1}
+CSL.setVariable{"sfx", true}
+CSL.setVariable{"music", true}
 
             --[[ ########## Extended Table Functions ########## ]--
 
