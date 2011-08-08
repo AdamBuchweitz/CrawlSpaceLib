@@ -898,6 +898,10 @@ name of the file.
 
     printFonts()
 
+    or
+
+    print("fonts")
+
 ]]
 
 printFonts = function()
