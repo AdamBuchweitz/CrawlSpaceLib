@@ -154,7 +154,7 @@ helpArr.save = 'Did you mean "Save" ?'
 local tonum = tonumber
 local split = function(str, pat)
     local t = {}
-    local fpat = "(.-)" .. pat
+    local fpat = "(.-)" .. (pat or " ")
     local last_end = 1
     local s, e, cap = str:find(fpat, 1)
     while s do
@@ -168,13 +168,13 @@ local split = function(str, pat)
     end
     return t
 end
+string.split = split
 
 Save = function(table, fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "w" )
 
-    if not table then table = Data end
-    for k,v in pairs( table ) do
+    for k,v in pairs( table or Data ) do
         if type(v) == "table" then
             for k2,v2 in pairs( v ) do
                 file:write( k .. ":" .. k2 .. "=" .. tostring(v2) .. "," )
@@ -804,16 +804,18 @@ a slider that changes the volume, do not forget to change the volume variable!
 local audio  = require "audio"
 local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
 audio.crossFadeBackground = function( path )
-    local musicPath = path or CSL.retrieveVariable("musicPath")
-    if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
-    audio.fadeOut({channel=audioChannel, time=500})
-    if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
-    audio.setVolume( CSL.retrieveVariable("volume"), {channel=audioChannel})
-    curAudio = audio.loadStream( musicPath )
-    audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
-    prevAudio = curAudio
-    currentSong = musicPath
-    audio.currentBackgroundChannel = audioChannel
+    if CSL.retrieveVariable("music") then
+        local musicPath = path or CSL.retrieveVariable("musicPath")
+        if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
+        audio.fadeOut({channel=audioChannel, time=500})
+        if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
+        audio.setVolume( CSL.retrieveVariable("volume"), {channel=audioChannel})
+        curAudio = audio.loadStream( musicPath )
+        audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
+        prevAudio = curAudio
+        currentSong = musicPath
+        audio.currentBackgroundChannel = audioChannel
+    end
 end
 audio.reserveChannels(2)
 audio.currentBackgroundChannel = 1
@@ -1111,13 +1113,14 @@ CSL.setVariable = function(...)
     else
         if new[2] == "true" then new[2] = true elseif new[2] == "false" then new[2] = false end
         CSL.registeredVariables[new[1]] = new[2]
-        if Data[new[1]] then Data[new[1]] = CSL.registeredVariables[new[1]] end
+        if Data[new[1]] ~= nil then Data[new[1]] = CSL.registeredVariables[new[1]] end
     end
 end
 setVar = CSL.setVariable
 
-CSL.registerVariable{"volume", 1}
-CSL.registerVariable{"sfx", true}
+CSL.setVariable{"volume", 1}
+CSL.setVariable{"sfx", true}
+CSL.setVariable{"music", true}
 
             --[[ ########## Extended Table Functions ########## ]--
 
@@ -1276,7 +1279,7 @@ local enableOF = function( params )
     openfeint = {}
     openfeint.launchDashboard = gameNetwork.show
     gameNetwork.init("openfeint",params.productKey,params.productSecret,params.displayName,params.appId)
-    if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards end
+    if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards; openfeint.leaderboards, openfeint.achievements = leaderboards, achievements end
     --local feint = cache.require("feint") -- external library
     --achievements, leaderboards = feint.achievements, feint.leaderboards
 
