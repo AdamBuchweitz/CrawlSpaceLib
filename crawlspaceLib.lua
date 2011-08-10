@@ -77,10 +77,10 @@ end
             --[[ ########## Global Screen Dimensions ########## ]--
 
 Use these global variables to position your elements. They are dynamic
-to all resolutions. Android devices are usually taller, so use screenTop to
+to all resolutions. Android devices are usually taller, so use screenY to
 set the position where you expect 0 to be. The iPad is wider than iPhones,
-so use screenLeft. Also the width and height need to factor these differences
-in as well, so use screenWidth and screenHeight. Lastly, centerX and centerY
+so use screenY. Also the width and height need to factor these differences
+in as well, so use screenWidth and screenHeight. Lastly, centerX and cetnerY
 are simply global remaps of display.contentCenterX and Y.
 
 :: USAGE ::
@@ -92,18 +92,10 @@ are simply global remaps of display.contentCenterX and Y.
     display.newRect(screenX, screenY, screenWidth, screenHeight) -- Cover the screen, no matter what size
 
 ]]
-              centerX = display.contentCenterX
-              centerY = display.contentCenterY
-              screenX = display.screenOriginX
-              screenY = display.screenOriginY
-          screenWidth = display.contentWidth - screenX * 2
-         screenHeight = display.contentHeight - screenY * 2
-           screenLeft = screenX
-          screenRight = screenX + screenWidth
-            screenTop = screenY
-         screenBottom = screenY + screenHeight
- display.contentWidth = screenWidth
-display.contentHeight = screenHeight
+centerX, centerY = display.contentCenterX, display.contentCenterY
+screenX, screenY = display.screenOriginX, display.screenOriginY
+screenWidth, screenHeight = display.contentWidth - screenX * 2, display.contentHeight - screenY * 2
+display.contentWidth, display.contentHeight = screenWidth, screenHeight
 
             --[[ ########## Global Content Scale and Suffix  ########## ]--
 
@@ -154,7 +146,7 @@ helpArr.save = 'Did you mean "Save" ?'
 local tonum = tonumber
 local split = function(str, pat)
     local t = {}
-    local fpat = "(.-)" .. (pat or " ")
+    local fpat = "(.-)" .. pat
     local last_end = 1
     local s, e, cap = str:find(fpat, 1)
     while s do
@@ -168,13 +160,13 @@ local split = function(str, pat)
     end
     return t
 end
-string.split = split
 
 Save = function(table, fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "w" )
 
-    for k,v in pairs( table or Data ) do
+    if not table then table = Data end
+    for k,v in pairs( table ) do
         if type(v) == "table" then
             for k2,v2 in pairs( v ) do
                 file:write( k .. ":" .. k2 .. "=" .. tostring(v2) .. "," )
@@ -307,32 +299,20 @@ local crawlspaceFillColor = function(self,r,g,b,a)
     self:cachedFillColor(r,g,b,a or 255)
 end
 
-local injectedDisplayMethods = {}
-injectDisplayMethod = function(name, method)
-    if type(method) ~= "function" then
-        error("Please pass a method to inject")
-    else
-        injectedDisplayMethods[#injectedDisplayMethods+1] = {name, method}
-    end
-end
-
 local tranc = transition.cancel
 local displayMethods = function( obj )
     local d = obj
+	d.distanceTo = function(self,x,y) local dist = math.ceil(math.sqrt( ((y - self.y) * (y - self.y)) + ((x - self.x) * (x - self.x)))) return dist end
+	d.angleTo = function(self,x,y) local angle = math.ceil(math.atan2( (y - self.y), (x - self.x) ) * 180 / math.pi) + 90 return angle end
     d.setPos = function(self,x,y) d.x, d.y = screenX+x, screenY+y end
+	d.setScaleP = function(self,scaleP) d.xScale, d.yScale = scaleP, scaleP end
+	d.setSize = function(self,height,width) d.height, d.width = height, width end
     d.center = function(self,axis) if axis == "x" then d.x=centerX elseif axis == "y" then d.y=centerY else d.x,d.y=centerX,centerY end end
     d.fader={}
     d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
     d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() display.remove(d) end elseif autoRemove then d.callback = function() callback(); display.remove(d); d=nil end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
     if d.setFillColor then d.cachedFillColor = d.setFillColor; d.setFillColor = crawlspaceFillColor end
-    if #injectedDisplayMethods > 0 then
-        for i,v in ipairs(injectedDisplayMethods) do
-            if d[v[1]] then d["cached"..v[1]] = d[v[1]] end
-            d[v[1]] = v[2]
-        end
-    end
 end
-
 
             --[[ ########## CrawlSpace Reference Points  ########## ]--
 
@@ -349,7 +329,7 @@ a nice warning message with wheatever image path was at fault.
 local referencePoints = function( obj, point )
     local rp = display[point] or display.c
     if obj then obj:setReferencePoint(rp); return true
-    else print("My deepest apologies, but there was a problem creating your display object... could you have mistyped your path?\n\n\n"); return false end
+    else print("\n\n\n\n\n My deepest apologies, but there was a problem creating your display object... \n could you have mistyped your path?\n\n\n\n\n"); return false end
 end
 
             --[[ ########## NewGroup Override  ########## ]--
@@ -804,18 +784,16 @@ a slider that changes the volume, do not forget to change the volume variable!
 local audio  = require "audio"
 local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
 audio.crossFadeBackground = function( path )
-    if CSL.retrieveVariable("music") then
-        local musicPath = path or CSL.retrieveVariable("musicPath")
-        if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
-        audio.fadeOut({channel=audioChannel, time=500})
-        if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
-        audio.setVolume( CSL.retrieveVariable("volume"), {channel=audioChannel})
-        curAudio = audio.loadStream( musicPath )
-        audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
-        prevAudio = curAudio
-        currentSong = musicPath
-        audio.currentBackgroundChannel = audioChannel
-    end
+    local musicPath = path or CSL.retrieveVariable("musicPath")
+    if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
+    audio.fadeOut({channel=audioChannel, time=500})
+    if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
+    audio.setVolume( CSL.retrieveVariable("volume"), {channel=audioChannel})
+    curAudio = audio.loadStream( musicPath )
+    audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
+    prevAudio = curAudio
+    currentSong = musicPath
+    audio.currentBackgroundChannel = audioChannel
 end
 audio.reserveChannels(2)
 audio.currentBackgroundChannel = 1
@@ -1109,14 +1087,13 @@ CSL.setVariable = function(...)
     else
         if new[2] == "true" then new[2] = true elseif new[2] == "false" then new[2] = false end
         CSL.registeredVariables[new[1]] = new[2]
-        if Data[new[1]] ~= nil then Data[new[1]] = CSL.registeredVariables[new[1]] end
+        if Data[new[1]] then Data[new[1]] = CSL.registeredVariables[new[1]] end
     end
 end
 setVar = CSL.setVariable
 
-CSL.setVariable{"volume", 1}
-CSL.setVariable{"sfx", true}
-CSL.setVariable{"music", true}
+CSL.registerVariable{"volume", 1}
+CSL.registerVariable{"sfx", true}
 
             --[[ ########## Extended Table Functions ########## ]--
 
@@ -1155,7 +1132,7 @@ print = function( ... )
     if simulator then
         if type(a) == "table" then
             cache.print("\nOutput Table Data:\n")
-            for k,v in pairs(a) do cache.print("\tKey: "..tostring(k), "Value: ", tostring(v)) end
+            for k,v in pairs(a) do cache.print("\tKey: "..k, "Value: ", v) end
         elseif #{...} > 1 then cache.print("\nOutput mutiple: ", ...)
         elseif a == "fonts" then printFonts()
         else cache.print("\nOutput "..type(a).." :: ", a or "") end
@@ -1263,42 +1240,39 @@ if showIntro then welcome() elseif startupTips then showTip() end
 cache.require = require
 
             --[[ ########## Open Feint Expansion ########## ]]--
-local achievements, leaderboards, gameNetwork
+local achievements, leaderboards, openfeint
 local enableOF = function( params )
-    gameNetwork = cache.require("gameNetwork")
+    openfeint = cache.require("openfeint")
     if not params then print("Please provide me with Open Feint info"); return false else
         if not params.productKey    then print("Missing Open Feint product key") end
         if not params.productSecret then print("Missing Open Feint product secret") end
         if not params.displayName   then print("Missing Open Feint display name") end
         if not params.appId         then print("Missing Open Feint app ID") end
     end
-    openfeint = {}
-    openfeint.launchDashboard = gameNetwork.show
-    gameNetwork.init("openfeint",params.productKey,params.productSecret,params.displayName,params.appId)
-    if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards; openfeint.leaderboards, openfeint.achievements = leaderboards, achievements end
-    --local feint = cache.require("feint") -- external library
-    --achievements, leaderboards = feint.achievements, feint.leaderboards
-
+    openfeint.init(params.productKey,params.productSecret,params.displayName,params.appId)
+    --if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards end
+    local feint = cache.require("feint") -- external library
+    achievements, leaderboards = feint.achievements, feint.leaderboards
 end
-
 Achieve = function( achievement )
-    --if not package.loaded["gameNetwork"] then print("Please Enable gameNetwork before attempting to unlock and achievement."); return false end
+    --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to unlock and achievement."); return false end
+    if not platform.ios then return true end
     if tonum(achievement) then
         if #tostring(achievement) ~= 6 then print("Invalid achievement number")
-        else gameNetwork.request("unlockAchievement",tostring(achievement)) end
+        else cache.require("openfeint").unlockAchievement(tostring(achievement)) end
     else
         if achievements then
-            if achievements[achievement] then gameNetwork.request("unlockAchievement",tostring(achievements[achievement]))
+            if achievements[achievement] then cache.require("openfeint").unlockAchievement(tostring(achievements[achievement]))
             else print("Cannot find that achievement") end
         else
-            if _G.achievements and _G.achievements[achievement] then gameNetwork.request("unlockAchievement",tostring(_G.achievements[achievement]))
+            if _G.achievements and _G.achievements[achievement] then cache.require("openfeint").unlockAchievement(tostring(_G.achievements[achievement]))
             else print("Cannot find that achievement") end
         end
     end
 end
-
 HighScore = function( board, score, display )
-    --if not package.loaded["gameNetwork"] then print("Please Enable gameNetwork before attempting to submit a High Score."); return false end
+    --if not package.loaded["openfeint"] then print("Please Enable OpenFeint before attempting to submit a High Score."); return false end
+    if not platform.ios then return true end
     local board = board
     if tonum(board) then
         if #tostring(board) ~= 6 then print("Invalid leaderboard number"); return false end
@@ -1311,7 +1285,8 @@ HighScore = function( board, score, display )
             else print("Cannot find that leaderboard"); return false end
         end
     end
-    gameNetwork.request("setHighScore", { leaderboardID=tostring(board), score=tonum(score), displayText=tostring(display)})
+    cache.require("openfeint").setHighScore( { leaderboardID=tostring(board), score=tonum(score), displayText=tostring(display)} )
+    --openfeint.setHighScore( { leaderboardID=boards[board], score=curBest, displayText=bestScore.text} )
 end
 
             --[[ ########## Flurry Expansion ########## ]]--
@@ -1647,7 +1622,7 @@ local debugger = function()
 end
 
 
-local libraryMethods = { gameNetwork = enableOF, openfeint = enableOF, analytics = enableFlurry, debug = debugger }
+local libraryMethods = { openfeint = enableOF, analytics = enableFlurry, debug = debugger }
 local libraryWhitelist = {"audio", "math", "string", "table", "debug" }
 local checkWhitelist = function(toCheck)
     for i,v in ipairs(libraryWhitelist) do if toCheck == v then return true end end
