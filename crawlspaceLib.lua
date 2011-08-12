@@ -324,6 +324,8 @@ local displayMethods = function( obj )
     d.fader={}
     d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
     d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() display.remove(d) end elseif autoRemove then d.callback = function() callback(); display.remove(d); d=nil end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
+    d.setStageFocus = function() display.getCurrentStage():setFocus(d) end
+    d.removeStageFocus = function() display.getCurrentStage():setFocus(nil) end
     if d.setFillColor then d.cachedFillColor = d.setFillColor; d.setFillColor = crawlspaceFillColor end
     if #injectedDisplayMethods > 0 then
         for i,v in ipairs(injectedDisplayMethods) do
@@ -688,6 +690,29 @@ timer.performWithDelay = function( time, callback, repeats, add )
     local repeats, add = repeats, add
     if type(repeats) == "boolean" then add = repeats; repeats = nil end
     local t = cache.performWithDelay(time, callback, repeats)
+    t._begin = system.getTimer()
+    t._delay = t._delay or time
+    t.cancel = function()
+        timer.cancel(t)
+        local v = table.search(timerArray, t)
+        if v then table.remove(timerArray, v) end
+        t, v = nil, nil
+    end
+    t.pause = function()
+        t._remaining = (t._count or 1 * t._delay) - (system.getTimer() - t._begin)
+        timer.cancel(t)
+        t.paused = true
+    end
+    t.resume = function()
+        if t.paused then
+            if repeats then
+            else
+                t = cache.performWithDelay(t._remaining, callback, add)
+            end
+            t.paused = nil
+            t._remaining = nil
+        end
+    end
     if add ~= false then
         timerArray[#timerArray+1] = t
     end
