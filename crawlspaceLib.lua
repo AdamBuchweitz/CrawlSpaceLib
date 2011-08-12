@@ -324,6 +324,8 @@ local displayMethods = function( obj )
     d.fader={}
     d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
     d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() display.remove(d) end elseif autoRemove then d.callback = function() callback(); display.remove(d); d=nil end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
+    d.setStageFocus = function() display.getCurrentStage():setFocus(d) end
+    d.removeStageFocus = function() display.getCurrentStage():setFocus(nil) end
     if d.setFillColor then d.cachedFillColor = d.setFillColor; d.setFillColor = crawlspaceFillColor end
     if #injectedDisplayMethods > 0 then
         for i,v in ipairs(injectedDisplayMethods) do
