@@ -690,6 +690,29 @@ timer.performWithDelay = function( time, callback, repeats, add )
     local repeats, add = repeats, add
     if type(repeats) == "boolean" then add = repeats; repeats = nil end
     local t = cache.performWithDelay(time, callback, repeats)
+    t._begin = system.getTimer()
+    t._delay = t._delay or time
+    t.cancel = function()
+        timer.cancel(t)
+        local v = table.search(timerArray, t)
+        if v then table.remove(timerArray, v) end
+        t, v = nil, nil
+    end
+    t.pause = function()
+        t._remaining = (t._count or 1 * t._delay) - (system.getTimer() - t._begin)
+        timer.cancel(t)
+        t.paused = true
+    end
+    t.resume = function()
+        if t.paused then
+            if repeats then
+            else
+                t = cache.performWithDelay(t._remaining, callback, add)
+            end
+            t.paused = nil
+            t._remaining = nil
+        end
+    end
     if add ~= false then
         timerArray[#timerArray+1] = t
     end
