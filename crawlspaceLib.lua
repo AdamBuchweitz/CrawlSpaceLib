@@ -792,14 +792,14 @@ transition.to = function(tweens, params)
 end
 
 cache.transitionCancel = transition.cancel
-transition.cancel = function( tweens)
+transition.cancel = function(tweens)
     if tweens then
-        if #tweens > 0 then
+        if tonum(tweens) then
+            cache.transitionCancel(tweens)
+        elseif #tweens then
             for i,v in ipairs(tweens) do
                 cache.transitionCancel(v)
             end
-        else
-            cache.transitionCancel(tweens)
         end
     end
 end
