@@ -705,12 +705,14 @@ timer.performWithDelay = function( time, callback, repeats, add )
     end
     t.resume = function()
         if t.paused then
+            local tmp = t._delay
             if repeats then
             else
                 t = cache.performWithDelay(t._remaining, callback, add)
             end
-            t.paused = nil
-            t._remaining = nil
+            t._delay = tmp
+            t._begin = system.getTimer()
+            t.paused, t._remaining, tmp = nil, nil, nil
         end
     end
     if add ~= false then
