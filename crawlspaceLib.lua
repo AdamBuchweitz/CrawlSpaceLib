@@ -1186,6 +1186,14 @@ table.search = function( table, v )
     end
 end
 
+table.copy = function( table )
+    local t2 = {}
+    for k,v in pairs( table ) do
+        t2[k] = v
+    end
+    return t2
+end
+
 
             --[[ ########## Extended Print ########## ]--
 
