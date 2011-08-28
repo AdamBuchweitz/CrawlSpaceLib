@@ -224,7 +224,7 @@ Load = function(fileName)
                 elseif pair[2] == "false" then pair[2] = false
                 elseif tonum(pair[2]) then pair[2] = tonum(pair[2]) end
                 if not dataTableNew[tonum(table[1]) or table[1]] then dataTableNew[tonum(table[1]) or table[1]] = {} end
-                dataTableNew[tonum(table[1]) or table[1]][pair[1]] = pair[2]
+                dataTableNew[tonum(table[1]) or table[1]][tonum(pair[1]) or pair[1]] = pair[2]
             else
                 local pair = split(v, "=")
                 if pair[2] == "true" then pair[2] = true
@@ -1174,7 +1174,7 @@ CSL.setVariable{"music", true}
 table.shuffle = function( a )
     local r, c = math.random, #a
     for i=1, (c * 20) do
-        local x, y = r(1,c), r(1,c)
+        local x, y = tonum(r(1,c)), tonum(r(1,c))
         a[x], a[y] = a[y], a[x]
     end
     return a
