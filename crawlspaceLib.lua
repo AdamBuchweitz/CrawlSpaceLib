@@ -195,10 +195,10 @@ Save = function(table, fileName)
     for k,v in pairs( table or Data ) do
         if type(v) == "table" then
             for k2,v2 in pairs( v ) do
-                file:write( k .. ":" .. k2 .. "=" .. tostring(v2) .. "," )
+                file:write( k .. ":" .. k2 .. "=" .. tostring(v2) .. "~" )
             end
         else
-            file:write( k .. "=" .. tostring(v) .. "," )
+            file:write( k .. "=" .. tostring(v) .. "~" )
         end
     end
 
@@ -213,7 +213,7 @@ Load = function(fileName)
 
     if file then
         local dataStr = file:read( "*a" )
-        local datavars = split(dataStr, ",")
+        local datavars = split(dataStr, "~")
         local dataTableNew = {}
 
         for k,v in pairs(datavars) do
