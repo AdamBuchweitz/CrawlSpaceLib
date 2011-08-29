@@ -17,7 +17,25 @@
 
 
     Copyright (C) 2011 Crawl Space Games - All Rights Reserved
-    Library is MIT licensed. More info at: http://crawlspacegames.com/license
+    Library is MIT licensed
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the “Software”),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
 
     All functionality is documented below. For syntax help use .help()
 
@@ -177,10 +195,10 @@ Save = function(table, fileName)
     for k,v in pairs( table or Data ) do
         if type(v) == "table" then
             for k2,v2 in pairs( v ) do
-                file:write( k .. ":" .. k2 .. "=" .. tostring(v2) .. "," )
+                file:write( k .. ":" .. k2 .. "=" .. tostring(v2) .. "~" )
             end
         else
-            file:write( k .. "=" .. tostring(v) .. "," )
+            file:write( k .. "=" .. tostring(v) .. "~" )
         end
     end
 
@@ -195,7 +213,7 @@ Load = function(fileName)
 
     if file then
         local dataStr = file:read( "*a" )
-        local datavars = split(dataStr, ",")
+        local datavars = split(dataStr, "~")
         local dataTableNew = {}
 
         for k,v in pairs(datavars) do
@@ -206,7 +224,7 @@ Load = function(fileName)
                 elseif pair[2] == "false" then pair[2] = false
                 elseif tonum(pair[2]) then pair[2] = tonum(pair[2]) end
                 if not dataTableNew[tonum(table[1]) or table[1]] then dataTableNew[tonum(table[1]) or table[1]] = {} end
-                dataTableNew[tonum(table[1]) or table[1]][pair[1]] = pair[2]
+                dataTableNew[tonum(table[1]) or table[1]][tonum(pair[1]) or pair[1]] = pair[2]
             else
                 local pair = split(v, "=")
                 if pair[2] == "true" then pair[2] = true
@@ -1156,7 +1174,7 @@ CSL.setVariable{"music", true}
 table.shuffle = function( a )
     local r, c = math.random, #a
     for i=1, (c * 20) do
-        local x, y = r(1,c), r(1,c)
+        local x, y = tonum(r(1,c)), tonum(r(1,c))
         a[x], a[y] = a[y], a[x]
     end
     return a
@@ -1166,6 +1184,14 @@ table.search = function( table, v )
     for k,value in pairs(table) do
         if v == value then return k end
     end
+end
+
+table.copy = function( table )
+    local t2 = {}
+    for k,v in pairs( table ) do
+        t2[k] = v
+    end
+    return t2
 end
 
 
