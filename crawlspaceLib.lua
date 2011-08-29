@@ -1296,6 +1296,7 @@ cache.require = require
             --[[ ########## Open Feint Expansion ########## ]]--
 local achievements, leaderboards, gameNetwork
 local enableOF = function( params )
+    openfeint = {}
     if not simulator then
         gameNetwork = cache.require("gameNetwork")
         if not params then print("Please provide me with Open Feint info"); return false else
@@ -1307,7 +1308,6 @@ local enableOF = function( params )
         openfeint.launchDashboard = gameNetwork.show
         gameNetwork.init("openfeint",params.productKey,params.productSecret,params.displayName,params.appId)
     end
-    openfeint = {}
     if system.pathForFile("feint.lua", system.ResourceDirectory) then local feint = require("feint"); achievements, leaderboards = feint.achievements, feint.leaderboards; openfeint.leaderboards, openfeint.achievements = leaderboards, achievements end
     --local feint = cache.require("feint") -- external library
     --achievements, leaderboards = feint.achievements, feint.leaderboards
@@ -1332,7 +1332,7 @@ Achieve = function( achievement )
     end
 end
 
-HighScore = function( board, score, display )
+HighScore = function( board, score, displayText )
     --if not package.loaded["gameNetwork"] then print("Please Enable gameNetwork before attempting to submit a High Score."); return false end
     local board = board
     if tonum(board) then
@@ -1347,7 +1347,7 @@ HighScore = function( board, score, display )
         end
     end
     if not simulator then
-        gameNetwork.request("setHighScore", { leaderboardID=tostring(board), score=tonum(score), displayText=tostring(display)})
+        gameNetwork.request("setHighScore", { leaderboardID=tostring(board), score=tonum(score), displayText=tostring(displayText)})
     end
 end
 
