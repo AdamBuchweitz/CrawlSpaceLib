@@ -429,7 +429,7 @@ it's reference point.
 
 :: EXAMPLE 1 ::
 
-    display.newRect(centerX, centerY, 20 [, "tl"])
+    display.newCircle(centerX, centerY, 20 [, "tl"])
 
 ]]
 
