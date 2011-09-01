@@ -454,10 +454,15 @@ it's reference point.
 
 helpArr.newRect = 'display.newRect(x-position, y-position, width, height [,referencePoint])'
 cache.newRect = display.newRect
-display.newRect = function( x, y, w, h, rp )
+display.newRect = function( parent, x, y, w, h, rp )
+    local parent, x, y, w, h, rp = parent, x, y, w, h, rp
+    if tonum(parent) then x, y, w, h, rp, parent = parent, x, y, w, h, nil end
+
     local r = cache.newRect( x, y, w, h )
     if referencePoints( r, rp or "tl" ) then displayMethods( r ) end
+    if parent then parent:insert(r) end
     r.x, r.y = x, y
+    parent, x, y, w, h, rp = nil, nil, nil, nil, nil, nil
     return r
 end
 
@@ -474,10 +479,15 @@ it's reference point.
 
 helpArr.newRoundedRect = 'display.newRoundedRect(x-position, y-position, width, height, radius [, referencePoint])'
 cache.newRoundedRect = display.newRoundedRect
-display.newRoundedRect = function( x, y, w, h, r, rp )
+display.newRoundedRect = function( parent, x, y, w, h, r, rp )
+    local parent, x, y, w, h, r, rp = parent, x, y, w, h, r, rp
+    if tonum(parent) then x, y, w, h, r, rp, parent = parent, x, y, w, h, r, nil end
+
     local r = cache.newRoundedRect( 0, 0, w, h, r ); r.x,r.y=x,y
     if referencePoints( r, rp ) then displayMethods( r ) end
+    if parent then parent:insert(r) end
     r.x, r.y = x, y
+    parent, x, y, w, h, rp = nil, nil, nil, nil, nil, nil
     return r
 end
 
@@ -497,9 +507,15 @@ it's reference point.
 
 helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referencePoint])\n\n\tNote that x and y positions are defaulted to the dynamic resolution value of the top left corner of the screen.'
 cache.newImage = display.newImage
-display.newImage = function( path, x, y, rp )
+display.newImage = function( parent, path, x, y, rp )
+
+    local parent, path, w, h, rp = parent, path, w, h, rp
+    if type(parent) == "string" then path, w, h, rp, parent = parent, path, w, h, nil end
+
     local i = cache.newImage( path, x or screenX, y or screenY )
     if referencePoints( i, rp ) then displayMethods( i ) end
+    if parent then parent:insert(i) end
+    local parent, path, w, h, rp = nil, nil, nil, nil, nil
     return i
 end
 
@@ -513,7 +529,7 @@ it's reference point.
 
 :: EXAMPLE 1 ::
 
-    display.newImageRect("myImage.png" [, 100, 50, "tl"])
+    display.newImageRect([parentGroup], "myImage.png" [, 100, 50, "tl"])
 
 :: EXAMPLE 2 ::
 
@@ -524,8 +540,11 @@ it's reference point.
 helpArr.newImageRect = 'display.newImage(filename [, width, height, referencePoint])\n\n\tNote that width and height values are defaulted to 380 and 570 respectively. These values corrospond to the "magic formula" commonly used to dynamic resolutions.'
 helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referencePoint])'
 cache.newImageRect = display.newImageRect
-display.newImageRect = function( path, baseDir, w, h, rp )
-    local baseDir, w, h, rp, i = baseDir, w, h, rp
+display.newImageRect = function( parent, path, baseDir, w, h, rp )
+
+    local parent, path, baseDir, w, h, rp, i = parent, path, baseDir, w, h, rp
+    if type(parent) == "string" then path, baseDir, w, h, rp, parent = parent, path, baseDir, w, h, nil end
+
     if type(baseDir) == "userdata" then
         i = cache.newImageRect( path, baseDir, w or 380, h or 570 )
     else
@@ -533,6 +552,8 @@ display.newImageRect = function( path, baseDir, w, h, rp )
         i = cache.newImageRect( path, w or 380, h or 570 )
     end
     if referencePoints( i, rp ) then displayMethods( i ) end
+    if parent then parent:insert(i) end
+    local parent, path, baseDir, w, h, rp  = nil, nil, nil, nil, nil, nil
     return i
 end
 
