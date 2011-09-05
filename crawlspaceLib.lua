@@ -452,7 +452,10 @@ it's reference point.
 ]]
 
 cache.newCircle = display.newCircle
-display.newCircle = function( x, y, r, rp )
+display.newCircle = function( parent, x, y, r, rp )
+    local parent, x, y, r, rp = parent, x, y, r, rp
+    if tonum(parent) then x, y, r, rp, parent = parent, x, y, r end
+
     local c = cache.newCircle( 0, 0, r )
     if referencePoints( c, rp ) then displayMethods( c ) end
     c.x, c.y = x, y
