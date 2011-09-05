@@ -52,8 +52,9 @@
 
         --[[ ########## Special Thanks ########## ]--
 
-    Thanks to Kenn Wagenheim, Jay Jennings, Bruce Martin, and Piotr Machowski
-    for all your input, contributions, and testing. You guys are great!
+    Thanks to Kenn Wagenheim, Jay Jennings, Bruce Martin, Piotr Machowski, and
+    the folks from SimpleLoop for all your input, contributions, and testing.
+    You guys are great!
 
 ]]--
 
@@ -386,7 +387,7 @@ a nice warning message with wheatever image path was at fault.
 local referencePoints = function( obj, point )
     local rp = display[point] or display.c
     if obj then obj:setReferencePoint(rp); return true
-    else print("My deepest apologies, but there was a problem creating your display object... could you have mistyped your path?\n\n\n"); return false end
+    else print("\n\n\n\n\n My deepest apologies, but there was a problem creating your display object... \n could you have mistyped your path?\n\n\n\n\n"); return false end
 end
 
             --[[ ########## NewGroup Override  ########## ]--
