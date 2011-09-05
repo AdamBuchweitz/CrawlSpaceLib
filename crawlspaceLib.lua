@@ -48,8 +48,8 @@
         director! Either modify your version of the director class,
         or use the one included with this library.
 
-    Thanks to Kenn Wagenheim, Jay Jennings, Bruce Martin for all your
-    input, contributions, and testing. You guys are great!
+    Thanks to Kenn Wagenheim, Jay Jennings, Bruce Martin, and Piotr Machowski
+    for all your input, contributions, and testing. You guys are great!
 
 ]]--
 
@@ -317,12 +317,20 @@ local hexTable = {f=15,e=14,d=13,c=12,b=11,a=10}
 local crawlspaceFillColor = function(self,r,g,b,a)
     local r,g,b,a = r,g,b,a
     if type(r) == "string" then
-        r = string.lower(string.gsub(r,"#",""))
-        local hex = {}; string.gsub(r,".",function(v) hex[#hex+1] = v end)
-        for i=1, #hex do if not tonum(hex[i]) then hex[i]=hexTable[hex[i]] end end
-        r,g,b,a = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6],( hex[7] or 16 )*( hex[8] or 16 ) - 1
+        local hex = string.lower(string.gsub(r,"#",""))
+        if hex:len() >= 6 then
+            r = tonum(hex:sub(1, 2), 16)
+            g = tonum(hex:sub(3, 4), 16)
+            b = tonum(hex:sub(5, 6), 16)
+            a = tonum(hex:sub(7, 8), 16) or 255
+        elseif hex:len() == 3 then
+            r = tonum(hex:sub(1, 1) .. hex:sub(1, 1), 16)
+            g = tonum(hex:sub(2, 2) .. hex:sub(2, 2), 16)
+            b = tonum(hex:sub(3, 3) .. hex:sub(3, 3), 16)
+            a = 255
+        end
     end
-    self:cachedFillColor(r,g,b,a or 255)
+    self:cachedFillColor(r,g,b,a)
 end
 
 local injectedDisplayMethods = {}
@@ -596,11 +604,24 @@ helpArr.setTextColor = 'myText:setTextColor( hex )\n\n\tor\n\n\tmyText:setTextCo
 local crawlspaceTextColor = function(self,r,g,b)
     local r,g,b = r,g,b
     if type(r) == "string" then
-        r = string.lower(string.gsub(r,"#",""))
-        local hex = {}; string.gsub(r,".",function(a) hex[#hex+1] = a end)
-        for i=1, #hex do if not tonum(hex[i]) then hex[i]=hexTable[hex[i]] end end
-        r,g,b = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6]
+        local hex = string.lower(string.gsub(r,"#",""))
+        if hex:len() == 6 then
+            r = tonum(hex:sub(1, 2), 16)
+            g = tonum(hex:sub(3, 4), 16)
+            b = tonum(hex:sub(5, 6), 16)
+        elseif hex:len() == 3 then
+            r = tonum(hex:sub(1, 1) .. hex:sub(1, 1), 16)
+            g = tonum(hex:sub(2, 2) .. hex:sub(2, 2), 16)
+            b = tonum(hex:sub(3, 3) .. hex:sub(3, 3), 16)
+        end
     end
+
+    --if type(r) == "string" then
+        --r = string.lower(string.gsub(r,"#",""))
+        --local hex = {}; string.gsub(r,".",function(a) hex[#hex+1] = a end)
+        --for i=1, #hex do if not tonum(hex[i]) then hex[i]=hexTable[hex[i]] end end
+        --r,g,b = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6]
+    --end
     self:cachedTextColor(r,g,b)
 end
 
