@@ -350,7 +350,11 @@ end
 local tranc = transition.cancel
 local displayMethods = function( obj )
     local d = obj
+    d.distanceTo = function(self,x,y) return ceil(sqrt( ((y - self.y) * (y - self.y)) + ((x - self.x) * (x - self.x)))) end
+    d.angleTo = function(self,x,y) return ceil(atan2( (y - self.y), (x - self.x) ) * 180 / pi) + 90 end
     d.setPos = function(self,x,y) d.x, d.y = screenX+x, screenY+y end
+    d.setScaleP = function(self,scaleP) d.xScale, d.yScale = scaleP, scaleP end
+    d.setSize = function(self,height,width) d.height, d.width = height, width end
     d.center = function(self,axis) if axis == "x" then d.x=centerX elseif axis == "y" then d.y=centerY else d.x,d.y=centerX,centerY end end
     d.fader={}
     d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
