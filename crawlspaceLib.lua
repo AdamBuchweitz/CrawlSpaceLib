@@ -17,7 +17,9 @@
 
 
     Copyright (C) 2011 Crawl Space Games - All Rights Reserved
+
     Library is MIT licensed
+
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the “Software”),
     to deal in the Software without restriction, including without limitation
@@ -43,10 +45,12 @@
 
 
     Note:
-        If you use the standard director class by Ricardo Rauber
+        If your project usees an old version of the Director class by Ricardo Rauber
         and use timer.cancelAll() you will cancel timers from the
         director! Either modify your version of the director class,
         or use the one included with this library.
+
+        --[[ ########## Special Thanks ########## ]--
 
     Thanks to Kenn Wagenheim, Jay Jennings, Bruce Martin, and Piotr Machowski
     for all your input, contributions, and testing. You guys are great!
