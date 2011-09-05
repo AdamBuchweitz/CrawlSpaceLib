@@ -606,7 +606,11 @@ end
 
 helpArr.newText = 'display.newText(string, x-position, y-position, font, size [, referencePoint ] )'
 cache.newText = display.newText
-display.newText = function( text, xPos, yPos, font, size, rp )
+display.newText = function( parent, text, xPos, yPos, font, size, rp )
+
+    local parent, text, xPos, yPos, font, size, rp = parent, text, xPos, yPos, font, size, rp
+    if type(parent) == "string" then text, xPos, yPos, font, size, rp = parent, text, xPos, yPos, font, size end
+
     local t = cache.newText(text, 0, 0, font, size * 2)
     referencePoints( t, rp ); displayMethods(t)
     t.xScale, t.yScale, t.x, t.y = .5, .5, xPos, yPos
