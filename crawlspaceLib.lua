@@ -312,6 +312,7 @@ center() method and either pass in "x", "y", or nothing to center both axis'.
 
 ]]
 
+local random, floor, ceil, abs, sqrt, atan2, pi = math.random, math.floor, math.ceil, math.abs, math.sqrt, math.atan2, math.pi
 helpArr.setFillColor = 'myRect:setFillColor( hex )\n\n\tor\n\n\tmyRect:setFillColor( red, green, blue [, alpha] )'
 local hexTable = {f=15,e=14,d=13,c=12,b=11,a=10}
 local crawlspaceFillColor = function(self,r,g,b,a)
@@ -1218,7 +1219,7 @@ CSL.setVariable{"music", true}
 ]]
 
 table.shuffle = function( a )
-    local r, c = math.random, #a
+    local r, c = random, #a
     for i=1, (c * 20) do
         local x, y = tonum(r(1,c)), tonum(r(1,c))
         a[x], a[y] = a[y], a[x]
@@ -1332,7 +1333,7 @@ local tipArray = {
     "Do you have a helpful Lua or CoronaSDK tip? Please send it to me and I'll include it in the library!"
 }
 local showTip = function()
-    cache.print("\n\nTip:\n\n\t"..tipArray[math.random(1,#tipArray)])
+    cache.print("\n\nTip:\n\n\t"..tipArray[random(1,#tipArray)])
 end
 
             --[[ ########## Welcome! ########## ]]--
@@ -1438,7 +1439,7 @@ end
             --[[ ########## Random help ########## ]]--
 -- Generate randomseed and pull the first three numbers out
 math.randomseed(system.getTimer())
-math.random(); math.random(); math.random()
+random(); random(); random()
 
             --[[ ########## Set up the platform table ########## ]]--
 platform = {}
@@ -1485,7 +1486,6 @@ local showFPS = function()
 
     local lastFps = {}
     local lastFpsCounter = 1
-    local floor, ceil = math.floor, math.ceil
     local updateFPS = function( event )
         local curTime = system.getTimer();
         local dt = curTime - prevTime;
@@ -1662,7 +1662,7 @@ local showDialog = function()
 
         local side = {0,-1,0,1}
         local side2 = {0,1,0,-1}
-        local abs, l, glow = math.abs
+        local l, glow
         for i=1, 4 do
             l = display.newLine(30, 0, 100, 0)
             l.x, l.y = 30*side[i], 30*side[5-i]
