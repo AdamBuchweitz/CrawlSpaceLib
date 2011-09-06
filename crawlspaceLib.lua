@@ -336,7 +336,7 @@ local crawlspaceFillColor = function(self,r,g,b,a)
             a = 255
         end
     end
-    self:cachedFillColor(r,g,b,a)
+    self:cachedFillColor(r,g,b,a or 255)
 end
 
 local injectedDisplayMethods = {}
@@ -628,13 +628,6 @@ local crawlspaceTextColor = function(self,r,g,b)
             b = tonum(hex:sub(3, 3) .. hex:sub(3, 3), 16)
         end
     end
-
-    --if type(r) == "string" then
-        --r = string.lower(string.gsub(r,"#",""))
-        --local hex = {}; string.gsub(r,".",function(a) hex[#hex+1] = a end)
-        --for i=1, #hex do if not tonum(hex[i]) then hex[i]=hexTable[hex[i]] end end
-        --r,g,b = hex[1]*hex[2],hex[3]*hex[4],hex[5]*hex[6]
-    --end
     self:cachedTextColor(r,g,b)
 end
 
