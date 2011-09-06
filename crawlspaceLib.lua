@@ -50,7 +50,7 @@
         director! Either modify your version of the director class,
         or use the one included with this library.
 
-        --[[ ########## Special Thanks ########## ]--
+        --[ ########## Special Thanks ########## ]--
 
     Thanks to Kenn Wagenheim, Jay Jennings, Bruce Martin, Piotr Machowski, and
     the folks from SimpleLoop for all your input, contributions, and testing.
@@ -719,7 +719,7 @@ an array for later cancelling. There is no change in syntax,
 none of your code will break.
 
 Sometimes you will want to cancel all timers EXCEPT a few,
-in which case simply pass in "false" when you creat your timer.
+in which case simply pass in "false" when you create your timer.
 
 :: EXAMPLE 1 ::
 
