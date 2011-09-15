@@ -636,14 +636,19 @@ helpArr.newText = 'display.newText(string, x-position, y-position, font, size [,
 cache.newText = display.newText
 display.newText = function( parent, text, xPos, yPos, font, size, rp )
 
+    local t
     local parent, text, xPos, yPos, font, size, rp = parent, text, xPos, yPos, font, size, rp
-    if type(parent) ~= "table" then text, xPos, yPos, font, size, rp = parent, text, xPos, yPos, font, size end
-
-    local t = cache.newText(text, 0, 0, font, size * 2)
+    if type(parent) ~= "table" then
+        text, xPos, yPos, font, size, rp = parent, text, xPos, yPos, font, size
+        t = cache.newText(text, 0, 0, font, size * 2)
+    else
+        t = cache.newText(parent, text, 0, 0, font, size * 2)
+    end
     referencePoints( t, rp ); displayMethods(t)
     t.xScale, t.yScale, t.x, t.y = .5, .5, xPos, yPos
     t.cachedTextColor = t.setTextColor
     t.setTextColor = crawlspaceTextColor
+    parent, text, xPos, yPos, font, size, rp = nil, nil, nil, nil, nil, nil
     return t
 end
 
