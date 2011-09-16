@@ -630,6 +630,7 @@ local crawlspaceTextColor = function(self,r,g,b)
         end
     end
     self:cachedTextColor(r,g,b)
+    r,g,b = nil, nil, nil
 end
 
 helpArr.newText = 'display.newText(string, x-position, y-position, font, size [, referencePoint ] )'
