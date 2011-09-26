@@ -792,7 +792,7 @@ timer.performWithDelay = function( time, callback, repeats, add )
             t.paused, t._remaining, tmp = nil, nil, nil
         end
     end
-    if add ~= false then
+    if add == true then
         timerArray[#timerArray+1] = t
     end
     return t
