@@ -1787,6 +1787,6 @@ Enable = function(library, params)
         return l
     end
 end
-if simulator then require = Enable end
+--if simulator then require = Enable end
 
 return CSL
