@@ -632,6 +632,7 @@ local crawlspaceTextColor = function(self,r,g,b)
         end
     end
     self:cachedTextColor(r,g,b)
+    r,g,b = nil, nil, nil
 end
 
 helpArr.newText = 'display.newText(string, x-position, y-position, font, size [, referencePoint ] )'
@@ -793,7 +794,7 @@ timer.performWithDelay = function( time, callback, repeats, add )
             t.paused, t._remaining, tmp = nil, nil, nil
         end
     end
-    if add ~= false then
+    if add == true then
         timerArray[#timerArray+1] = t
     end
     return t
@@ -1788,6 +1789,6 @@ Enable = function(library, params)
         return l
     end
 end
-if simulator then require = Enable end
+--if simulator then require = Enable end
 
 return CSL
