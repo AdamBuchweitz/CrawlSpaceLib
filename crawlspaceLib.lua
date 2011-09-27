@@ -125,6 +125,8 @@ are simply global remaps of display.contentCenterX and Y.
           screenRight = screenX + screenWidth
             screenTop = screenY
          screenBottom = screenY + screenHeight
+   cache.contentWidth = display.contentWidth
+  cache.contentHeight = display.contentHeight
  display.contentWidth = screenWidth
 display.contentHeight = screenHeight
 
