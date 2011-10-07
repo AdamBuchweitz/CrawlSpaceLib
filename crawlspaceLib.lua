@@ -554,13 +554,13 @@ helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referen
 cache.newImage = display.newImage
 display.newImage = function( parent, path, x, y, rp )
 
-    local parent, path, w, h, rp = parent, path, w, h, rp
-    if type(parent) == "string" then path, w, h, rp, parent = parent, path, w, h, nil end
+    local parent, path, x, y, rp = parent, path, x, y, rp
+    if type(parent) == "string" then path, x, y, rp, parent = parent, path, x, y, nil end
 
     local i = cache.newImage( path, x or screenX, y or screenY )
     if referencePoints( i, rp ) then displayMethods( i ) end
     if parent then parent:insert(i) end
-    local parent, path, w, h, rp = nil, nil, nil, nil, nil
+    local parent, path, x, y, rp = nil, nil, nil, nil, nil
     return i
 end
 
