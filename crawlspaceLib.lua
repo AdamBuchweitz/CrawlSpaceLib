@@ -322,6 +322,27 @@ center() method and either pass in "x", "y", or nothing to center both axis'.
 local random, floor, ceil, abs, sqrt, atan2, pi = math.random, math.floor, math.ceil, math.abs, math.sqrt, math.atan2, math.pi
 helpArr.setFillColor = 'myRect:setFillColor( hex )\n\n\tor\n\n\tmyRect:setFillColor( red, green, blue [, alpha] )'
 local hexTable = {f=15,e=14,d=13,c=12,b=11,a=10}
+hexToRGB = function(h, format)
+    local r,g,b,a
+    local hex = string.lower(string.gsub(h,"#",""))
+    if hex:len() >= 6 then
+        r = tonum(hex:sub(1, 2), 16)
+        g = tonum(hex:sub(3, 4), 16)
+        b = tonum(hex:sub(5, 6), 16)
+        a = tonum(hex:sub(7, 8), 16)
+    elseif hex:len() == 3 then
+        r = tonum(hex:sub(1, 1) .. hex:sub(1, 1), 16)
+        g = tonum(hex:sub(2, 2) .. hex:sub(2, 2), 16)
+        b = tonum(hex:sub(3, 3) .. hex:sub(3, 3), 16)
+        a = 255
+    end
+    if format == "table" then
+        return {r,b,g,a or 255}
+    else
+        return r,b,g,a or 255
+    end
+end
+
 local crawlspaceFillColor = function(self,r,g,b,a)
     local r,g,b,a = r,g,b,a
     if type(r) == "string" then
