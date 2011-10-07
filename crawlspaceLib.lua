@@ -337,9 +337,9 @@ hexToRGB = function(h, format)
         a = 255
     end
     if format == "table" then
-        return {r,b,g,a or 255}
+        return {r,g,b,a or 255}
     else
-        return r,b,g,a or 255
+        return r,g,b,a or 255
     end
 end
 
