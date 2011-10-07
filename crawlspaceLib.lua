@@ -1111,15 +1111,20 @@ so access it during the first few seconds of launch.
 ]]
 
 helpArr.executeIfInternet = 'executeIfInternet(myInternetMethod, myNonInternetMethod)'
-local toExecute = {}
+local onInternet = {}
 local checkForInternet
-local executeOnNet = function()
-    for i=1, #toExecute do local f = table.remove(toExecute); f(); f=nil end
+local executeOnNet = function(bool)
+    if bool then
+        for i=1, #onInternet do local f = table.remove(onInternet); f.y(); f=nil end
+    else
+        for i=1, #onInternet do local f = table.remove(onInternet); f.n(); f=nil end
+    end
 end
 -- Sets global variable "internet"
 local internetListener = function( event )
-    if event.isError then _G.internet = false; timer.performWithDelay(30000, checkForInternet, false)
-    else _G.internet = true; executeOnNet() end
+    if event.isError then _G.internet = false
+    else _G.internet = true end
+    executeOnNet(_G.internet)
     return true
 end
 
@@ -1128,10 +1133,10 @@ checkForInternet = function()
 end
 checkForInternet()
 
-executeIfInternet = function(f)
-    if internet then f(); return true
-    elseif internet == false then return false
-    elseif internet == nil then toExecute[#toExecute+1] = f end
+executeIfInternet = function(y, n)
+    if internet then y(); return true
+    elseif internet == false then n(); return false
+    elseif internet == nil then onInternet[#onInternet+1] = {y=y, n=n} end
 end
 
             --[[ ########## Global Information Handling ########## ]--
