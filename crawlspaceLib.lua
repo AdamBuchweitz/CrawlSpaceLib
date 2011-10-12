@@ -322,6 +322,27 @@ center() method and either pass in "x", "y", or nothing to center both axis'.
 local random, floor, ceil, abs, sqrt, atan2, pi = math.random, math.floor, math.ceil, math.abs, math.sqrt, math.atan2, math.pi
 helpArr.setFillColor = 'myRect:setFillColor( hex )\n\n\tor\n\n\tmyRect:setFillColor( red, green, blue [, alpha] )'
 local hexTable = {f=15,e=14,d=13,c=12,b=11,a=10}
+hexToRGB = function(h, format)
+    local r,g,b,a
+    local hex = string.lower(string.gsub(h,"#",""))
+    if hex:len() >= 6 then
+        r = tonum(hex:sub(1, 2), 16)
+        g = tonum(hex:sub(3, 4), 16)
+        b = tonum(hex:sub(5, 6), 16)
+        a = tonum(hex:sub(7, 8), 16)
+    elseif hex:len() == 3 then
+        r = tonum(hex:sub(1, 1) .. hex:sub(1, 1), 16)
+        g = tonum(hex:sub(2, 2) .. hex:sub(2, 2), 16)
+        b = tonum(hex:sub(3, 3) .. hex:sub(3, 3), 16)
+        a = 255
+    end
+    if format == "table" then
+        return {r,g,b,a or 255}
+    else
+        return r,g,b,a or 255
+    end
+end
+
 local crawlspaceFillColor = function(self,r,g,b,a)
     local r,g,b,a = r,g,b,a
     if type(r) == "string" then
@@ -1111,15 +1132,20 @@ so access it during the first few seconds of launch.
 ]]
 
 helpArr.executeIfInternet = 'executeIfInternet(myInternetMethod, myNonInternetMethod)'
-local toExecute = {}
+local onInternet = {}
 local checkForInternet
-local executeOnNet = function()
-    for i=1, #toExecute do local f = table.remove(toExecute); f(); f=nil end
+local executeOnNet = function(bool)
+    if bool then
+        for i=1, #onInternet do local f = table.remove(onInternet); f.y(); f=nil end
+    else
+        for i=1, #onInternet do local f = table.remove(onInternet); f.n(); f=nil end
+    end
 end
 -- Sets global variable "internet"
 local internetListener = function( event )
-    if event.isError then _G.internet = false; timer.performWithDelay(30000, checkForInternet, false)
-    else _G.internet = true; executeOnNet() end
+    if event.isError then _G.internet = false
+    else _G.internet = true end
+    executeOnNet(_G.internet)
     return true
 end
 
@@ -1128,10 +1154,10 @@ checkForInternet = function()
 end
 checkForInternet()
 
-executeIfInternet = function(f)
-    if internet then f(); return true
-    elseif internet == false then return false
-    elseif internet == nil then toExecute[#toExecute+1] = f end
+executeIfInternet = function(y, n)
+    if internet then y(); return true
+    elseif internet == false then n(); return false
+    elseif internet == nil then onInternet[#onInternet+1] = {y=y, n=n} end
 end
 
             --[[ ########## Global Information Handling ########## ]--
