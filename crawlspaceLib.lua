@@ -1281,6 +1281,16 @@ table.copy = function( table )
     return t2
 end
 
+table.instances = function( table, v )
+    local num = 0
+    for i=1, #table do
+        if table[i] == v then
+            num = num + 1
+        end
+    end
+    return num
+end
+
 
             --[[ ########## Extended Print ########## ]--
 
