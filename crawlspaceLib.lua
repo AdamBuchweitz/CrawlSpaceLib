@@ -141,7 +141,7 @@ the global variable "simulator" is set to true.
 ]]
 
 scale, suffix = display.contentScaleX, ""
-if scale < 1 then if scale > .5 then suffix = "@1.5x" else suffix = "@2x" end end
+if scale < 1 then if scale > .5 then suffix = "@android" else suffix = "@2x" end end
 --magicWidth, magicHeight = 760*scale, 1140*scale
 magicWidth, magicHeight = 380, 570
 
