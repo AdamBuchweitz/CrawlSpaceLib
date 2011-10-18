@@ -1,0 +1,37 @@
+# Crawl Space Library
+
+## v1.1.3
+
+The library and demo app are located in the "dist" folder.
+
+All methods and features are documented in crawlspaceLib.lua.
+
+Included is a main.lua file with sample code to demonstrate some features.
+
+
+### For general usage, simply:
+
+<code>
+require("crawlspacelib.lib").init(true)
+</code>
+
+
+### For access to the library's public methods:
+
+<code>
+local CSL = require("crawlspacelib.lib").init(true)
+</code>
+
+
+### To see a list of features:
+
+<code>
+local CSL = require("crawlspacelib.lib").init(true)<br>
+CSL.listFeatures()
+</code>
+
+---
+
+To donate, ___[go here](http://www.crawlspacegames.com/crawl-space-corona-sdk-library/ "Donate")___
+
+To email me, drop your note ___[here](mailto:adam@crawlspacegames.com "Email")___
