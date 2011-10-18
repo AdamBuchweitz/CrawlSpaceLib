@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="CrawlSpaceLib" default="build" basedir=".">
-	<property name="name"      value="crawlspacelib.lua" />
+	<property name="name"      value="crawlspaceLib.lua" />
 	<property name="src"       location="${basedir}/src" />
 	<property name="lib"       location="${basedir}/lib" />
 	<property name="img"       location="${basedir}/img" />
