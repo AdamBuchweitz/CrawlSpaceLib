@@ -2,6 +2,7 @@
 <project name="CrawlSpaceLib" default="build" basedir=".">
 	<property name="name"  value="crawlspacelib.lua" />
 	<property name="src"   location="${basedir}/src" />
+	<property name="lib"   location="${basedir}/lib" />
 	<property name="img"   location="${basedir}/img" />
   	<property name="build" location="${basedir}/build" />
   	<property name="dist"  location="${basedir}/dist" />
@@ -33,11 +34,11 @@
 		<!-- copy the built library -->
 		<copy file="${build}/${stamp}-${name}" tofile="${dist}/${name}"/>
 		<!-- copy the supporting files -->
-		<copy file="${src}/main.lua" tofile="${dist}/main.lua"/>
-		<copy file="${src}/config.lua" tofile="${dist}/config.lua"/>
-		<copy file="${src}/director.lua" tofile="${dist}/director.lua"/>
+		<copy file="${lib}/main.lua"           tofile="${dist}/main.lua"/>
+		<copy file="${lib}/config.lua"         tofile="${dist}/config.lua"/>
+		<copy file="${lib}/director.lua"       tofile="${dist}/director.lua"/>
 		<!-- copy images -->
-		<copy file="${img}/Icon.png" tofile="${dist}/Icon.png"/>
+		<copy file="${img}/Icon.png"           tofile="${dist}/Icon.png"/>
 	</target>
 	
 	<target name="build" depends="dist">
