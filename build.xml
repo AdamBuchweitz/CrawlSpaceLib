@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<project name="CrawlSpaceLib" default="build" basedir=".">
+	<property name="name"  value="crawlspacelib.lua" />
+	<property name="src"   location="${basedir}/src" />
+	<property name="img"   location="${basedir}/img" />
+  	<property name="build" location="${basedir}/build" />
+  	<property name="dist"  location="${basedir}/dist" />
+  	<!-- create a time stamp -->
+	<tstamp>
+		<format property="TODAY" pattern="yyyyMMddhhmmss" />
+	</tstamp>
+  	<property name="stamp" value="${TODAY}" />
+  	
+	<target name="init">
+		<!-- create the directory structure -->
+		<echo>Creating Directories</echo>
+		<mkdir dir="${build}"/>
+		<mkdir dir="${dist}"/>
+	</target>
+	
+	<target name="concat" depends="init" description="concatenate the source" >
+		<!-- concatenate all of the source files into one file -->
+		<echo>Building Source...</echo>
+		<concat destfile="${build}/${stamp}-${name}">
+			<filelist dir="src" files="crawlspacelib.lua"/>
+		</concat>
+		<echo message="${build}/${stamp}-${name}" />
+	</target>
+	
+	<target name="dist" depends="concat" description="move everything into the dist folder">
+		<!-- move everything into the dist folder -->
+		<echo>Moving Everything Into Place</echo>
+		<!-- copy the built library -->
+		<copy file="${build}/${stamp}-${name}" tofile="${dist}/${name}"/>
+		<!-- copy the supporting files -->
+		<copy file="${src}/main.lua" tofile="${dist}/main.lua"/>
+		<copy file="${src}/config.lua" tofile="${dist}/config.lua"/>
+		<copy file="${src}/director.lua" tofile="${dist}/director.lua"/>
+		<!-- copy images -->
+		<copy file="${img}/Icon.png" tofile="${dist}/Icon.png"/>
+	</target>
+	
+	<target name="build" depends="dist">
+		<!-- empty task -->
+	</target>
+	
+	<target name="clean" description="clean up build files">
+		<echo>Clean up build files</echo>
+		<delete dir="${build}"/>
+	</target>
+    
+</project>
