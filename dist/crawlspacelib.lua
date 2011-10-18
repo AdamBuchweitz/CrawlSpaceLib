@@ -58,6 +58,7 @@
 
 ]]--
 
+
 -- Set this to false to bypass the welcome message
 local showIntro = false
 
@@ -66,8 +67,6 @@ local startupTips = false
 
 -- Enable debug print messages, as well as on-device prints
 local debug = true
-
-
 
 -- CSL is the actual object returned
 local CSL = {}
@@ -394,7 +393,6 @@ local displayMethods = function( obj )
         end
     end
 end
-
 
             --[[ ########## CrawlSpace Reference Points  ########## ]--
 
@@ -1014,7 +1012,6 @@ native.cancelWebPopup = function()
     if curPopup and curPopup.removeSelf then display.remove(curPopup) else cache.cancelWebPopup() end
 end
 
-
             --[[ ########## Print Available Fonts  ########## ]--
 
 Call printFonts() to see a printed list of all installed fonts.
@@ -1053,7 +1050,6 @@ mind clear.
 ]]
 
 initFont = function( fontName, globalName ) _G[globalName] = fontName end
-
 
             --[[ ########## Cross Platform Filename ########## ]--
 
@@ -1168,7 +1164,7 @@ across the entire app, that may need to be changes in any one of a myriad
 different files. For me the trade off is worth it. In main.lua I register
 whatever variables I will need to track, and many of those I retrieve on
 applicationExit to save them for use on next launch. Other than saving data,
-it's very helpful to use these to keep track of a score, or a volume leve,
+it's very helpful to use these to keep track of a score, or a volume level,
 whether or not to play SFX, etc.
 
 This set of functions is left accessible via crawlspaceLib.registerVariable
@@ -1291,7 +1287,6 @@ table.instances = function( table, v )
     return num
 end
 
-
             --[[ ########## Extended Print ########## ]--
 
 It's pointless to print out a table - instead you want the key/value
@@ -1332,33 +1327,6 @@ print = function( ... )
             end
         end
     end
-end
-
-            --[[ ########## List Feature ########## ]--
-
-List all features for quick reference
-
-]]
-
-CSL.listFeatures = function()
-    local print = cache.print
-    print("\nFeature List:\n")
-    print("\n+ Global variables for dynamic resolution")
-    print("\n+ Super simple saving and loading")
-    print("\n+ Shortened reference points, passible as arguments to all display objects")
-    print("\n+ Insert multiple objects into a group")
-    print("\n+ Automatic retina-ready text")
-    print("\n+ Paragraphs")
-    print("\n+ Exposed API: timer.cancelAll()")
-    print("\n+ Safe timer.cancel()")
-    print("\n+ Crossfade background audio")
-    print("\n+ Play SFX based on registered true/false variable")
-    print("\n+ Simulator-friendly webPopups")
-    print("\n+ Print installed font names with printFonts()")
-    print("\n+ Initialize and globalize a font with one line")
-    print("\n+ Execute a function if internet is detected, execute another if not connected")
-    print("\n+ Global information handling")
-    print("\n+ Extended print statement")
 end
 
             --[[ ########## Startup Tips ########## ]--
@@ -1403,8 +1371,6 @@ local welcome = function()
 end
 
 if showIntro then welcome() elseif startupTips then showTip() end
-
-
 
             --[[ ############################################### ]]--
             --[[ ####################       #################### ]]--
@@ -1484,7 +1450,6 @@ Log = function( event )
     if not package.loaded["analytics"] then print("Please Enable Analytics before attempting to log an event."); return false end
     analytics.logEvent( event )
 end
-
 
             --[[ ########## Random help ########## ]]--
 -- Generate randomseed and pull the first three numbers out

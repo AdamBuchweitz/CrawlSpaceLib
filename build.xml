@@ -1,11 +1,44 @@
 <?xml version="1.0"?>
 <project name="CrawlSpaceLib" default="build" basedir=".">
-	<property name="name"  value="crawlspacelib.lua" />
-	<property name="src"   location="${basedir}/src" />
-	<property name="lib"   location="${basedir}/lib" />
-	<property name="img"   location="${basedir}/img" />
-  	<property name="build" location="${basedir}/build" />
-  	<property name="dist"  location="${basedir}/dist" />
+	<property name="name"      value="crawlspacelib.lua" />
+	<property name="src"       location="${basedir}/src" />
+	<property name="lib"       location="${basedir}/lib" />
+	<property name="img"       location="${basedir}/img" />
+  	<property name="build"     location="${basedir}/build" />
+  	<property name="dist"      location="${basedir}/dist" />
+  	<property name="srcfiles"  value="intro.lua, 
+  	                                  screendimensions.lua, 
+  	                                  contentscale.lua, 
+  	                                  savingloading.lua, 
+  	                                  referencepointshorthand.lua, 
+  	                                  displayobjects.lua, 
+  	                                  referencepoints.lua, 
+  	                                  newgroup.lua, 
+  	                                  newcircle.lua,
+  	                                  newrect.lua,
+  	                                  newroundedrect.lua,
+  	                                  newimage.lua,
+  	                                  newimagerect.lua,
+  	                                  sprite.lua,
+  	                                  retinatext.lua,
+  	                                  newparagraph.lua,
+  	                                  timerhijack.lua,
+  	                                  safetimercancel.lua,
+  	                                  transitions.lua,
+  	                                  musiccrossfade.lua,
+  	                                  sfx.lua,
+  	                                  safewebpopups.lua,
+  	                                  fonts.lua,
+  	                                  crossplatformfilename.lua,
+  	                                  internet.lua,
+  	                                  globals.lua,
+  	                                  table.lua,
+  	                                  print.lua,
+  	                                  featurelist.lua,
+  	                                  startuptips.lua,
+  	                                  welcome.lua,
+  	                                  beta.lua,
+  	                                  outro.lua" />
   	<!-- create a time stamp -->
 	<tstamp>
 		<format property="TODAY" pattern="yyyyMMddhhmmss" />
@@ -23,7 +56,7 @@
 		<!-- concatenate all of the source files into one file -->
 		<echo>Building Source...</echo>
 		<concat destfile="${build}/${stamp}-${name}">
-			<filelist dir="src" files="crawlspacelib.lua"/>
+			<filelist dir="src" files="${srcfiles}"/>
 		</concat>
 		<echo message="${build}/${stamp}-${name}" />
 	</target>
