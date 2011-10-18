@@ -2,7 +2,9 @@
 
 ## v1.1.3
 
-All methods and features are documented in crawlspaceLib.lua
+The library and demo app are located in the "dist" folder.
+
+All methods and features are documented in crawlspaceLib.lua.
 
 Included is a main.lua file with sample code to demonstrate some features.
 
@@ -27,6 +29,14 @@ local CSL = require "crawlspaceLib"
 local CSL = require "crawlspaceLib"<br>
 CSL.listFeatures()
 </code>
+
+## Developers
+
+All source code is in the "src" directory.
+
+Run `ant` or `ant build` from the main directory to build the source.
+
+`ant clean` will clean up after the build process.
 
 ---
 
