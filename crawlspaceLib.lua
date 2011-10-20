@@ -658,18 +658,26 @@ end
 
 helpArr.newText = 'display.newText(string, x-position, y-position, font, size [, referencePoint ] )'
 cache.newText = display.newText
-display.newText = function( parent, text, xPos, yPos, font, size, rp )
+display.newText = function( parent, text, xPos, yPos, width, height, font, size, rp )
 
     local t
-    local parent, text, xPos, yPos, font, size, rp = parent, text, xPos, yPos, font, size, rp
+    local parent, text, xPos, yPos, width, height, font, size, rp = parent, text, xPos, yPos, width, height, font, size, rp
     if type(parent) ~= "table" then
-        text, xPos, yPos, font, size, rp = parent, text, xPos, yPos, font, size
-        t = cache.newText(text, 0, 0, font, size * 2)
+        text, xPos, yPos, width, height, font, size, rp = parent, text, xPos, yPos, width, height, font, size
+        if type(width) == "number" then
+            t = cache.newText(text, 0, 0, width * 2, height * 2, font, size * 2)
+        else
+            t = cache.newText(text, 0, 0, width, height * 2)
+        end
     else
-        t = cache.newText(parent, text, 0, 0, font, size * 2)
+        if type(width) == "number" then
+            t = cache.newText(parent, text, 0, 0, width, height, font, size * 2)
+        else
+            t = cache.newText(parent, text, 0, 0, width, height * 2)
+        end
     end
     referencePoints( t, rp ); displayMethods(t)
-    t.xScale, t.yScale, t.x, t.y = .5, .5, xPos, yPos
+    t.xScale, t.yScale, t.x, t.y = 0.5, 0.5, xPos, yPos
     t.cachedTextColor = t.setTextColor
     t.setTextColor = crawlspaceTextColor
     parent, text, xPos, yPos, font, size, rp = nil, nil, nil, nil, nil, nil
