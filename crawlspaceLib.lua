@@ -667,12 +667,14 @@ display.newText = function( parent, text, xPos, yPos, width, height, font, size,
         if type(width) == "number" then
             t = cache.newText(text, 0, 0, width * 2, height * 2, font, size * 2)
         else
+            rp = font
             t = cache.newText(text, 0, 0, width, height * 2)
         end
     else
         if type(width) == "number" then
             t = cache.newText(parent, text, 0, 0, width, height, font, size * 2)
         else
+            rp = font
             t = cache.newText(parent, text, 0, 0, width, height * 2)
         end
     end
