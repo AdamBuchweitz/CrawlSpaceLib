@@ -1,7 +1,8 @@
 
             --[[ ########## Require ########## ]]--
 
-local CSL = require "crawlspaceLib"
+local CSL = require("crawlspacelib.lib").init(true)
+
 
             --[[ ########## Init Font Demo ########## ]]--
 
