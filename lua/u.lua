@@ -58,26 +58,109 @@
 
 ]]--
 
-require 'lua.core.data'
+local u = {}
+u.u = u
+setmetatable(_G, {__index = u})
 
-u = {}
+u.initFont = function( one, two)
+end
+
+display.newParagraph = function()
+    return {}
+end
+
+simulator = true
+
+require 'lua.core.data'
+require 'lua.core.message'
+
+Message('here is a test another test, but this one is really long')
+
+u.cache = {}
+u.helpArr = {}
+u.help = function(item)
+    local print = u.cache.print or print
+    if not item then
+        print("\n\nUse this help feature for syntax additions in Crawl Space functions.")
+        print('\n\nUSAGE EXAMPLE:\n\n\tcrawlspaceLib.help("newText")')
+    else
+        print('\n\nCrawlSpace Help: '..item..'\n')
+        if u.helpArr[item] then print('\t'..u.helpArr[item]) else
+            print('Sorry, I cannot find that item. Available items are:')
+            for k,v in pairs(u.helpArr) do print('\n -- '..k) end
+        end
+    end
+end
+
+local extendMapping = {
+
+    table     = 'lua.core.table',
+    shorthand = 'lua.core.shorthand',
+    timer     = 'lua.timer.timer',
+    ''
+}
+
+local extend = function(arg)
+    print('EXTENDING:: \n\t\t'..arg..'\n')
+    if extendMapping[arg] then
+        require(extendMapping[arg])
+    else
+        error('Not a valid extend')
+    end
+end
+
+u.extend = function(...)
+    local arg = {...}
+    if not arg[1] or arg[1] == 'all' then
+        for i=1, #extendMapping do
+            extend(extendMapping[i])
+        end
+    else
+        print('\n\n\t--[[ ########## Begin Selective Extending ########## ]]--\n')
+        if #arg > 1 then
+            for i=1, #arg do
+                extend(arg[i])
+            end
+        elseif type(arg[1]) == 'table' then
+            for i=1, #arg[1] do
+                extend(arg[1][i])
+            end
+        else
+            extend(arg[1])
+        end
+    end
+end
+
+local overrideMappings = {
+    timer = 'lua.timer.safeTimer',
+    print = 'lua.util.print'
+}
+
+local override = function(arg)
+    print('OVERRIDING:: \n\t\t'..arg..'\n')
+    if overrideMappings[arg] then
+        require(overrideMappings[arg])
+    else
+        error('Not a valid override')
+    end
+end
+
 u.override = function(...)
     local arg = {...}
-    local print = cache.print
     if not arg[1] or arg[1] == 'all' then
-        print('override everything!!!!')
+        print('override everything!')
     else
         print('\n\n\t--[[ ########## Begin Selective Override ########## ]]--\n')
         if #arg > 1 then
             for i=1, #arg do
-                print('OVERRIDING:: \n\t\t'..arg[i]..'\n')
+                override(arg[i])
             end
         elseif type(arg[1]) == 'table' then
             for i=1, #arg[1] do
-                print('OVERRIDING:: \n\t\t'..arg[1][i]..'\n')
+                override(arg[1][i])
             end
         else
-            print('Only overriding: '..arg[1])
+            override(arg[1])
         end
     end
 end
