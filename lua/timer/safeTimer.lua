@@ -21,7 +21,9 @@ a kind warning letting you know, but there be no error
 
 ]]
 
-return function(CSL, private, cache)
-	cache.timerCancel = timer.cancel
-	timer.cancel = function(t) if t then cache.timerCancel(t) end end
+cache.timerCancel = timer.cancel
+timer.cancel = function(t)
+    if t then
+        timerCancel(t)
+    end
 end
