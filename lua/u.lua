@@ -70,18 +70,18 @@ display.newParagraph = function()
 end
 
 simulator = true
-
-require 'lua.core.data'
-require 'lua.core.message'
-
-Message('here is a test another test, but this one is really long')
-
 u.cache = {}
 u.helpArr = {}
+
+require 'lua.core.comm'
+require 'lua.core.data'
+require 'lua.core.string'
+require 'lua.core.featurelist'
+
 u.help = function(item)
     local print = u.cache.print or print
     if not item then
-        print("\n\nUse this help feature for syntax additions in Crawl Space functions.")
+        print('\n\nUse this help feature for syntax additions in Crawl Space functions.')
         print('\n\nUSAGE EXAMPLE:\n\n\tcrawlspaceLib.help("newText")')
     else
         print('\n\nCrawlSpace Help: '..item..'\n')
@@ -92,18 +92,16 @@ u.help = function(item)
     end
 end
 
-local extendMapping = {
-
+local extendMappings = {
     table     = 'lua.core.table',
     shorthand = 'lua.core.shorthand',
-    timer     = 'lua.timer.timer',
-    ''
+    timer     = 'lua.timer.timer'
 }
 
 local extend = function(arg)
-    print('EXTENDING:: \n\t\t'..arg..'\n')
-    if extendMapping[arg] then
-        require(extendMapping[arg])
+    Alert('EXTENDING::'..arg)
+    if extendMappings[arg] then
+        require(extendMappings[arg])
     else
         error('Not a valid extend')
     end
@@ -112,11 +110,12 @@ end
 u.extend = function(...)
     local arg = {...}
     if not arg[1] or arg[1] == 'all' then
-        for i=1, #extendMapping do
-            extend(extendMapping[i])
+        Banner('Extending everything')
+        for key, _ in pairs(extendMappings) do
+            extend(key)
         end
     else
-        print('\n\n\t--[[ ########## Begin Selective Extending ########## ]]--\n')
+        Banner('Begin Selective Extending')
         if #arg > 1 then
             for i=1, #arg do
                 extend(arg[i])
@@ -137,7 +136,7 @@ local overrideMappings = {
 }
 
 local override = function(arg)
-    print('OVERRIDING:: \n\t\t'..arg..'\n')
+    Alert('OVERRIDING:: '..arg)
     if overrideMappings[arg] then
         require(overrideMappings[arg])
     else
@@ -148,9 +147,12 @@ end
 u.override = function(...)
     local arg = {...}
     if not arg[1] or arg[1] == 'all' then
-        print('override everything!')
+        Banner('Overriding everything')
+        for key, _ in pairs(overrideMappings) do
+            override(key)
+        end
     else
-        print('\n\n\t--[[ ########## Begin Selective Override ########## ]]--\n')
+        Banner('Begin Selective Override')
         if #arg > 1 then
             for i=1, #arg do
                 override(arg[i])
