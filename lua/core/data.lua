@@ -26,28 +26,32 @@ returns the table.
 
 ]]
 
---helpArr.Save = 'Save(table [, filename])'
---helpArr.save = 'Did you mean "Save" ?'
-local tonum = tonumber
-local split = function(str, pat)
-    local t = {}
-    local fpat = "(.-)" .. (pat or " ")
-    local last_end = 1
-    local s, e, cap = str:find(fpat, 1)
-    while s do
-        if s ~= 1 or cap ~= "" then table.insert(t,cap) end
-        last_end = e+1
-        s, e, cap = str:find(fpat, last_end)
-    end
-    if last_end <= #str then
-        cap = str:sub(last_end)
-        table.insert(t,cap)
-    end
-    return t
-end
-string.split = split
+local tonum    = tonumber
+local tostring = tostring
+local Data     = {}
 
-Save = function(table, fileName)
+
+--[[### Save ###]--
+    #
+    # Summary:      Saves a table to a text file in the documents directory.
+                    If no file name is passed, it is defaulted to 'data.txt',
+                    and if no table is passed, it is assumed to be saving the
+                    Data table, set by using the Defaults method. With this
+                    set up you can simply declare your defaults that you would
+                    like to save, then Load() on applicationStart and Save()
+                    whenever you change any of the defaults and all your info
+                    will be handled without a headache.
+
+                    Save and Load support a table depth of 2. Meaning you can
+                    have a table of tables, but not a table of tables of tables.
+    # Parameters:   Table, File Name
+    # Returns:      Nothing
+    #
+    #]]
+
+helpArr.Save = 'Save(table [, filename])'
+helpArr.save = 'Did you mean "Save" ?'
+u.Save = function(table, fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "w" )
 
@@ -64,9 +68,18 @@ Save = function(table, fileName)
     io.close( file )
 end
 
---helpArr.Load = 'local mySavedData = Load([filename])'
---helpArr.load = 'Did you mean "Load"?'
-Load = function(fileName)
+
+--[[### Load ###]--
+    #
+    # Summary:      
+    # Parameters:   Table
+    # Returns:      Nothing
+    #
+    #]]
+
+helpArr.Load = 'local mySavedData = Load([filename])'
+helpArr.load = 'Did you mean "Load"?'
+u.Load = function(fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "r" )
 
@@ -104,10 +117,132 @@ Load = function(fileName)
     end
 end
 
-Defaults = function(d)
+--[[### Defaults ###]--
+    #
+    # Summary:      Asssigns all passed key / pair values to a Data table,
+                    as well as registers them for getVar access. The value
+                    of this is that these variables will be automatically
+                    saved when Save() is called
+    # Parameters:   Table
+    # Returns:      Nothing
+    #
+    #]]
+
+u.Defaults = function(d)
     for k,v in pairs(d) do
         Data[k] = v
         setVar{k,v,true}
     end
 end
-Data = {}
+
+
+            --[[ ########## Global Information Handling ########## ]--
+
+Some of you may choose not to use this set of functions because global
+information is generally a bad idea. What I use this for is tracking data
+across the entire app, that may need to be changes in any one of a myriad
+different files. For me the trade off is worth it. In main.lua I register
+whatever variables I will need to track, and many of those I retrieve on
+applicationExit to save them for use on next launch. Other than saving data,
+it's very helpful to use these to keep track of a score, or a volume level,
+whether or not to play SFX, etc.
+
+This set of functions is left accessible via crawlspaceLib.registerVariable
+because if you find yourself using them often you will want them localized.
+
+As a side note, Crawl Space Library automatically registers a variable for
+'volume' and 'sfx', as these are going to be used in most projects.
+
+:: USAGE ::
+
+    registerVar{ variableName, initialValue }
+
+    registerBulk({ name1, name2, name3, name4}, initialValue)
+
+    getVar(variableName)
+
+    setVar{variableName, value [, true]}
+
+:: EXAMPLE 1 ::
+
+    registerVar{'sfx', true}
+
+    setVar{'sfx', false}
+
+    print(getVar('sfx')) <== prints false
+
+:: EXAMPLE 2 ::
+
+    registerVar{'score', 0}
+
+    setVar{'score', 1}
+    setVar{'score', 2} -- Because 'score' is a number, these add rather then set
+
+    print(getVar('score')) <== prints 3
+
+    setVar{'score', 0, true} -- Setting the last argument to true makes a number set rather than add
+
+    print(getVar('score')) <== prints 0
+
+]]
+
+local registeredVariables = {}
+local registerVariable = function(...)
+    local var, var2 = ...; var = var2 or var
+    if var[2] == 'true' then
+        var[2] = true
+    elseif var[2] == 'false' then
+        var[2] = false
+    end
+    registeredVariables[var[1]] = var[2]
+end
+
+local registerBulk = function(...)
+    local var, var2 = ...; var = var2 or var
+    for i,v in ipairs(var[1]) do
+        u.registerVariable{var[1][i], var[2]}
+    end
+end
+u.registerBulk = registerBulk
+
+local retrieveVariable = function(...)
+    local name, name2 = ...; name = name2 or name
+    local var = registeredVariables[name]
+    if private.tonum(var) then
+        var = private.tonum(var)
+    end
+    return var
+end
+u.getVar = retrieveVariable
+
+local setVariable = function(...)
+    local new, new2 = ...; new = new2 or new
+    if type(new[2]) == 'number' then
+        if not registeredVariables[new[1]] then
+            registeredVariables[new[1]] = new[2]
+        else
+            registeredVariables[new[1]] = registeredVariables[new[1]] + new[2]
+            if new[3] then
+                registeredVariables[new[1]] = new[2]
+            end
+            if Data[new[1]] then
+                Data[new[1]] = registeredVariables[new[1]]
+            end
+        end
+    else
+        if new[2] == 'true' then
+            new[2] = true
+        elseif new[2] == 'false' then
+            new[2] = false
+        end
+        registeredVariables[new[1]] = new[2]
+        if Data[new[1]] ~= nil then
+            Data[new[1]] = registeredVariables[new[1]]
+        end
+    end
+end
+u.setVar = setVariable
+
+setVariable{'volume', 1}
+setVariable{'sfx', true}
+setVariable{'music', true}
