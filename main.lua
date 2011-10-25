@@ -24,9 +24,9 @@ myParagraph.x, myParagraph.y = centerX, screenHeight*.2
 
             --[[ ########## Help Demo ########## ]]--
 
-CSL.help("newParagraph")
+--u.help("newParagraph")
 
-CSL.help()
+--u.help()
 
             --[[ ########## Timer Demo ########## ]]--
 
@@ -52,11 +52,11 @@ local mySquare, myCircle
 local mTrans = function()
     mySquare = display.newRect( 10, 20, 10, 10 )
     mySquare.onComplete = function() print("transition 1") end
-    mySquare:fadeIn()
+    --mySquare:fadeIn()
 
     myCircle = display.newCircle( screenX + screenWidth - 10, 20, 5, "tr") -- Set the reference point as an argument
     myCircle.onComplete = function() print("transition 2") end
-    myCircle:fadeIn()
+    --myCircle:fadeIn()
 
     -- The new "targetSelf" params will target the onComplete table listener of each source
     transition.to({mySquare, myCircle}, {time=5000, y=screenHeight - 20, targetSelf=true})
@@ -66,9 +66,9 @@ timer.performWithDelay(1500, mTrans, false)
             --[[ ########## Multiple Inserts Demo ########## ]]--
 
 local group = display.newGroup()
-group:insert(myParagraph, mySquare, myCircle)
+--group:insert(myParagraph, mySquare, myCircle)
 
-group:fadeIn()
+--group:fadeIn()
 
             --[[ ########## Internet-Based Functions Demo ########## ]]--
 
@@ -80,4 +80,4 @@ local noWebz = function()
     print("Sorry, you are not connected to the internet.")
 end
 
-executeIfInternet(webz, noWebz)
+--executeIfInternet(webz, noWebz)
