@@ -1,29 +1,31 @@
 
-            --[[ ########## List Feature ########## ]--
+  --[[ ########## List Features ########## ]--
 
-List all features for quick reference
+    # Note:       Please add new features to this list!
+    #
+    # Summary:    List all features for quick reference
+    # Returns:    Nothing
+    # Parameters: None
+    # Author:     Adam Buchweitz
+    # ]]
 
-]]
-
-return function(CSL, private, cache)
-	CSL.listFeatures = function()
-		local print = cache.print
-		print("\nFeature List:\n")
-		print("\n+ Global variables for dynamic resolution")
-		print("\n+ Super simple saving and loading")
-		print("\n+ Shortened reference points, passible as arguments to all display objects")
-		print("\n+ Insert multiple objects into a group")
-		print("\n+ Automatic retina-ready text")
-		print("\n+ Paragraphs")
-		print("\n+ Exposed API: timer.cancelAll()")
-		print("\n+ Safe timer.cancel()")
-		print("\n+ Crossfade background audio")
-		print("\n+ Play SFX based on registered true/false variable")
-		print("\n+ Simulator-friendly webPopups")
-		print("\n+ Print installed font names with printFonts()")
-		print("\n+ Initialize and globalize a font with one line")
-		print("\n+ Execute a function if internet is detected, execute another if not connected")
-		print("\n+ Global information handling")
-		print("\n+ Extended print statement")
-	end
+u.featureList = function()
+    print("\n\tFeature List:\n"..
+    "\n\t+ Global variables for dynamic resolution"..
+    "\n\t+ Super simple saving and loading"..
+    "\n\t+ Shortened reference points, passible as arguments to all display objects"..
+    "\n\t+ Insert multiple objects into a group"..
+    "\n\t+ Automatic retina-ready text"..
+    "\n\t+ Paragraphs"..
+    "\n\t+ Exposed API: timer.cancelAll()"..
+    "\n\t+ Safe timer.cancel()"..
+    "\n\t+ Crossfade background audio"..
+    "\n\t+ Play SFX based on registered true/false variable"..
+    "\n\t+ Simulator-friendly webPopups"..
+    "\n\t+ Print installed font names with printFonts()"..
+    "\n\t+ Initialize and globalize a font with one line"..
+    "\n\t+ Execute a function if internet is detected, execute another if not connected"..
+    "\n\t+ Global information handling"..
+    "\n\t+ Extended print statement")
 end
+u.listFeatures = u.featureList
