@@ -1,4 +1,13 @@
 
+  --[[ ########## Communication ########## ]--
+
+    # Summary:      Output noticable banners to differenciate between
+    #               user 'print' statements and Lua.u alerts
+    #
+    # Author:       Adam Buchweitz
+    #
+    # ]]
+
 local print  = print
 local ceil   = math.ceil
 
@@ -7,8 +16,18 @@ local fullLine  = '\n\t #                                                       
 local indent    = '\n\t # '
 local bannerBot = '\n\t ########################################################### '
 
+--[[### Alert ###]--
+    #
+    # Summary:      Outputs a noticable alert to the terminal
+    # Parameters:   String
+    # Returns:      Nothing
+    #
+    # ]]
+
 Alert = function(message)
-    if simulator and not silent then
+    -- Only output if the environment is the simulator,
+    -- and the 'VERBOSE' variable is set to 'true'
+    if simulator and VERBOSE then
         local splitString, lineCache, tempString = string.split(message, " "), {}, ""
         local messageText = ''
         if #message > 55 then
@@ -32,8 +51,18 @@ Alert = function(message)
     end
 end
 
+--[[### Banner ###]--
+    #
+    # Summary:      Outputs a large, unmissable banner to the terminal
+    # Parameters:   String
+    # Returns:      Nothing
+    #
+    # ]]
+
 Banner = function(message)
-    if simulator and not silent then
+    -- Only output if the environment is the simulator,
+    -- and the 'VERBOSE' variable is set to 'true'
+    if simulator and VERBOSE then
 
         local splitString, lineCache, tempString = string.split(message, " "), {}, ""
         local messageText = ''
