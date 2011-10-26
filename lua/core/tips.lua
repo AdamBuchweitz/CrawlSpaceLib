@@ -18,4 +18,6 @@ local tipArray = {
     "Try running .help() for syntax help ( i.e. u.help('executeIfInternet'))",
     "Do you have a helpful Lua or CoronaSDK tip? Please send it to me and I'll include it in the library!"
 }
-print("\n\nTip:\n\n\t"..tipArray[math.random(#tipArray)])
+if INTRO then
+    print("\n\nTip:\n\n\t"..tipArray[math.random(#tipArray)])
+end
