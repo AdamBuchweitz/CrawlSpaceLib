@@ -69,7 +69,8 @@ display.newParagraph = function()
     return {}
 end
 
-simulator = true
+u.simulator = true
+u.VERBOSE = true
 u.cache = {}
 u.helpArr = {}
 
@@ -93,6 +94,22 @@ u.help = function(item)
     end
 end
 
+local initMappings = {}
+local initializing = false
+local initialized  = false
+
+u.init = function(func)
+    if not initialized and not initializing then
+        initializing = true
+        func()
+        for i=1,#initMappings,1 do 
+            require(initMappings[i])
+        end
+        initializing = false
+        initialized  = true
+    end
+end
+
 local extendMappings = {
     table     = 'lua.core.table',
     shorthand = 'lua.core.shorthand',
@@ -104,31 +121,34 @@ local extendMappings = {
 local extend = function(arg)
     Alert('EXTENDING::'..arg)
     if extendMappings[arg] then
-        require(extendMappings[arg])
+        --require(extendMappings[arg])
+        initMappings[#initMappings+1] = extendMappings[arg]
     else
         error('Not a valid extend')
     end
 end
 
 u.extend = function(...)
-    local arg = {...}
-    if not arg[1] or arg[1] == 'all' then
-        Banner('Extending everything')
-        for key, _ in pairs(extendMappings) do
-            extend(key)
-        end
-    else
-        Banner('Begin Selective Extending')
-        if #arg > 1 then
-            for i=1, #arg do
-                extend(arg[i])
-            end
-        elseif type(arg[1]) == 'table' then
-            for i=1, #arg[1] do
-                extend(arg[1][i])
+    if initializing and not initialized then
+        local arg = {...}
+        if not arg[1] or arg[1] == 'all' then
+            Banner('Extending everything')
+            for key, _ in pairs(extendMappings) do
+                extend(key)
             end
         else
-            extend(arg[1])
+            Banner('Begin Selective Extending')
+            if #arg > 1 then
+                for i=1, #arg do
+                    extend(arg[i])
+                end
+            elseif type(arg[1]) == 'table' then
+                for i=1, #arg[1] do
+                    extend(arg[1][i])
+                end
+            else
+                extend(arg[1])
+            end
         end
     end
 end
@@ -141,31 +161,34 @@ local overrideMappings = {
 local override = function(arg)
     Alert('OVERRIDING:: '..arg)
     if overrideMappings[arg] then
-        require(overrideMappings[arg])
+        --require(overrideMappings[arg])
+        initMappings[#initMappings+1] = overrideMappings[arg]
     else
         error('Not a valid override')
     end
 end
 
 u.override = function(...)
-    local arg = {...}
-    if not arg[1] or arg[1] == 'all' then
-        Banner('Overriding everything')
-        for key, _ in pairs(overrideMappings) do
-            override(key)
-        end
-    else
-        Banner('Begin Selective Override')
-        if #arg > 1 then
-            for i=1, #arg do
-                override(arg[i])
-            end
-        elseif type(arg[1]) == 'table' then
-            for i=1, #arg[1] do
-                override(arg[1][i])
+    if initializing and not initialized then
+        local arg = {...}
+        if not arg[1] or arg[1] == 'all' then
+            Banner('Overriding everything')
+            for key, _ in pairs(overrideMappings) do
+                override(key)
             end
         else
-            override(arg[1])
+            Banner('Begin Selective Override')
+            if #arg > 1 then
+                for i=1, #arg do
+                    override(arg[i])
+                end
+            elseif type(arg[1]) == 'table' then
+                for i=1, #arg[1] do
+                    override(arg[1][i])
+                end
+            else
+                override(arg[1])
+            end
         end
     end
 end

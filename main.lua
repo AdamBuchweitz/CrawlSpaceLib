@@ -3,8 +3,10 @@
 
 require 'lua.u'
 
-extend()
-override()
+init(function()
+  extend()
+  override() 
+end)
 
             --[[ ########## Init Font Demo ########## ]]--
 
