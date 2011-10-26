@@ -77,6 +77,7 @@ require 'lua.core.comm'
 require 'lua.core.data'
 require 'lua.core.string'
 require 'lua.core.featurelist'
+require 'lua.core.misc'
 
 u.help = function(item)
     local print = u.cache.print or print
