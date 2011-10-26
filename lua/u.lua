@@ -96,6 +96,7 @@ end
 local extendMappings = {
     table     = 'lua.core.table',
     shorthand = 'lua.core.shorthand',
+    tips      = 'lua.core.tips',
     timer     = 'lua.timer.timer'
 }
 
