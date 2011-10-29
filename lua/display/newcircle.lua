@@ -10,15 +10,13 @@ it's reference point.
 
 ]]
 
-return function(CSL, private, cache)
-	cache.newCircle = display.newCircle
-	display.newCircle = function( parent, x, y, r, rp )
-		local parent, x, y, r, rp = parent, x, y, r, rp
-		if private.tonum(parent) then x, y, r, rp, parent = parent, x, y, r end
-	
-		local c = cache.newCircle( 0, 0, r )
-		if private.referencePoints( c, rp ) then private.displayMethods( c ) end
-		c.x, c.y = x, y
-		return c
-	end
+cache.newCircle = display.newCircle
+display.newCircle = function( parent, x, y, r, rp )
+    local parent, x, y, r, rp = parent, x, y, r, rp
+    if tonum(parent) then x, y, r, rp, parent = parent, x, y, r end
+
+    local c = cache.newCircle( 0, 0, r )
+    if referencePoints( c, rp ) then displayMethods( c ) end
+    c.x, c.y = x, y
+    return c
 end

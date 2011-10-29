@@ -10,37 +10,35 @@ often, you should still preload it.
 
 :: EXAMPLE 1 ::
 
-    private.audio.playSFX("sfx_tap.aac")
+    audio.playSFX("sfx_tap.aac")
 
 :: EXAMPLE 2 ::
 
-    local hitSFX = private.audio.loadSound("sfx_hit.aac")
-    private.audio.playSFX( hitSFX )
+    local hitSFX = audio.loadSound("sfx_hit.aac")
+    audio.playSFX( hitSFX )
 
 :: EXAMPLE 3 ::
 
     setVar{"sfx", false}
 
-    local hitSFX = private.audio.loadSound("sfx_hit.aac")
-    private.audio.playSFX( hitSFX ) -- This will not play the sound now
+    local hitSFX = audio.loadSound("sfx_hit.aac")
+    audio.playSFX( hitSFX ) -- This will not play the sound now
 
 ]]
 
-return function(CSL, private, cache)
-	private.audio.playSFX = function( snd, params )
-		local channel
-		if CSL.retrieveVariable("sfx") == true then
-			local play = function()
-				if params and params.delay then params.delay=nil end
-				if type(snd) == "string" then channel=private.audio.play(private.audio.loadSound(snd), params)
-				else channel=private.audio.play(snd, params) end
-			end
-			if params and params.delay then
-				timer.performWithDelay(params.delay, play, false)
-			else
-				play()
-			end
-		end
-		return channel
-	end
+audio.playSFX = function( snd, params )
+    local channel
+    if CSL.retrieveVariable("sfx") == true then
+        local play = function()
+            if params and params.delay then params.delay=nil end
+            if type(snd) == "string" then channel=audio.play(audio.loadSound(snd), params)
+            else channel=audio.play(snd, params) end
+        end
+        if params and params.delay then
+            timer.performWithDelay(params.delay, play, false)
+        else
+            play()
+        end
+    end
+    return channel
 end

@@ -3,7 +3,7 @@
 
 ]]
 
-local tonum  = tonumber
+tonum  = tonumber
 local random = math.random
 
 table.shuffle = function( a )

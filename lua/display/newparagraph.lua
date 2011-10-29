@@ -40,9 +40,7 @@ myParagraph.text
 ]]
 
 helpArr.newParagraph = 'display.newParagraph( string, charactersWide, { [font=font, size=size, lineHeight=lineHeight, align=align] })\n\n\tor\n\n\tdisplay.newParagraph( string, charactersWide, size )'
-
 local textAlignments = {left="cl",right="cr",center="c",centered="c",middle="c"}
-
 display.newParagraph = function( string, width, params )
     local format; if type(params) == "number" then format={size = params} else format=params end
     local splitString, lineCache, tempString = string.split(string, " "), {}, ""

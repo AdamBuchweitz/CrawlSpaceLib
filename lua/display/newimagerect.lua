@@ -17,24 +17,22 @@ it's reference point.
 
 ]]
 
-return function(CSL, private, cache)
-	private.helpArr.newImageRect = 'display.newImage(filename [, width, height, referencePoint])\n\n\tNote that width and height values are defaulted to 380 and 570 respectively. These values corrospond to the "magic formula" commonly used to dynamic resolutions.'
-	private.helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referencePoint])'
-	cache.newImageRect = display.newImageRect
-	display.newImageRect = function( parent, path, baseDir, w, h, rp )
-	
-		local parent, path, baseDir, w, h, rp, i = parent, path, baseDir, w, h, rp
-		if type(parent) == "string" then path, baseDir, w, h, rp, parent = parent, path, baseDir, w, h, nil end
-	
-		if type(baseDir) == "userdata" then
-			i = cache.newImageRect( path, baseDir, w or 380, h or 570 )
-		else
-			w, h, rp = baseDir, w, h
-			i = cache.newImageRect( path, w or 380, h or 570 )
-		end
-		if private.referencePoints( i, rp ) then private.displayMethods( i ) end
-		if parent then parent:insert(i) end
-		local parent, path, baseDir, w, h, rp  = nil, nil, nil, nil, nil, nil
-		return i
-	end
+helpArr.newImageRect = 'display.newImage(filename [, width, height, referencePoint])\n\n\tNote that width and height values are defaulted to 380 and 570 respectively. These values corrospond to the "magic formula" commonly used to dynamic resolutions.'
+helpArr.newImage = 'display.newImage(filename [, x-position, y-position, referencePoint])'
+cache.newImageRect = display.newImageRect
+display.newImageRect = function( parent, path, baseDir, w, h, rp )
+
+    local parent, path, baseDir, w, h, rp, i = parent, path, baseDir, w, h, rp
+    if type(parent) == "string" then path, baseDir, w, h, rp, parent = parent, path, baseDir, w, h, nil end
+
+    if type(baseDir) == "userdata" then
+        i = cache.newImageRect( path, baseDir, w or 380, h or 570 )
+    else
+        w, h, rp = baseDir, w, h
+        i = cache.newImageRect( path, w or 380, h or 570 )
+    end
+    if referencePoints( i, rp ) then displayMethods( i ) end
+    if parent then parent:insert(i) end
+    local parent, path, baseDir, w, h, rp  = nil, nil, nil, nil, nil, nil
+    return i
 end

@@ -55,33 +55,31 @@ so access it during the first few seconds of launch.
 
 ]]
 
-return function(CSL, private, cache)
-	private.helpArr.executeIfInternet = 'executeIfInternet(myInternetMethod, myNonInternetMethod)'
-	local onInternet = {}
-	local checkForInternet
-	local executeOnNet = function(bool)
-		if bool then
-			for i=1, #onInternet do local f = table.remove(onInternet); f.y(); f=nil end
-		else
-			for i=1, #onInternet do local f = table.remove(onInternet); f.n(); f=nil end
-		end
-	end
-	-- Sets global variable "internet"
-	local internetListener = function( event )
-		if event.isError then _G.internet = false
-		else _G.internet = true end
-		executeOnNet(_G.internet)
-		return true
-	end
-	
-	checkForInternet = function()
-		network.request("http://google.com/", "GET", internetListener)
-	end
-	checkForInternet()
-	
-	executeIfInternet = function(y, n)
-		if internet then y(); return true
-		elseif internet == false then n(); return false
-		elseif internet == nil then onInternet[#onInternet+1] = {y=y, n=n} end
-	end
+helpArr.executeIfInternet = 'executeIfInternet(myInternetMethod, myNonInternetMethod)'
+local onInternet = {}
+local checkForInternet
+local executeOnNet = function(bool)
+    if bool then
+        for i=1, #onInternet do local f = table.remove(onInternet); f.y(); f=nil end
+    else
+        for i=1, #onInternet do local f = table.remove(onInternet); f.n(); f=nil end
+    end
+end
+-- Sets global variable "internet"
+local internetListener = function( event )
+    if event.isError then _G.internet = false
+    else _G.internet = true end
+    executeOnNet(_G.internet)
+    return true
+end
+
+checkForInternet = function()
+    network.request("http://google.com/", "GET", internetListener)
+end
+checkForInternet()
+
+executeIfInternet = function(y, n)
+    if internet then y(); return true
+    elseif internet == false then n(); return false
+    elseif internet == nil then onInternet[#onInternet+1] = {y=y, n=n} end
 end

@@ -9,11 +9,9 @@ the global variable "simulator" is set to true.
 
 ]]
 
-return function(CSL, private, cache)
-	scale, suffix = display.contentScaleX, ""
-	if scale < 1 then if scale > .5 then suffix = "@android" else suffix = "@2x" end end
-	--magicWidth, magicHeight = 760*scale, 1140*scale
-	magicWidth, magicHeight = 380, 570
-	
-	if system.getInfo("environment") == "simulator" then simulator = true end
-end
+scale, suffix = display.contentScaleX, ""
+if scale < 1 then if scale > .5 then suffix = "@android" else suffix = "@2x" end end
+--magicWidth, magicHeight = 760*scale, 1140*scale
+magicWidth, magicHeight = 380, 570
+
+if system.getInfo("environment") == "simulator" then simulator = true end

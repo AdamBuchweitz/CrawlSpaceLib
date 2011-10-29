@@ -31,22 +31,20 @@ object when instantiating the group.
 
 ]]
 
-return function(CSL, private, cache)
-	private.helpArr.insert = 'myGroup:insert([index,] object1 [, object2, object3, resetTransform])'
-	private.crawlspaceInsert = function(...)
-		local t = {...}
-		local b, reset = 0, nil
-		if type(t[#t]) == "boolean" then b = 1; reset = t[#t] end
-		if type(t[2]) == "number" then for i=3, #t-b do t[1]:cachedInsert(t[2],t[i],reset); if reset and t[i].text then t[i].xScale, t[i].yScale=.5,.5 end end
-		else for i=2, #t-b do t[1]:cachedInsert(t[i],reset); if reset and t[i].text then t[i].xScale, t[i].yScale=.5,.5 end end
-		end
-	end
-	cache.newGroup = display.newGroup
-	display.newGroup = function(...)
-		local g = cache.newGroup(...)
-		g.cachedInsert = g.insert
-		g.insert = private.crawlspaceInsert
-		private.displayMethods( g )
-		return g
-	end
+helpArr.insert = 'myGroup:insert([index,] object1 [, object2, object3, resetTransform])'
+local crawlspaceInsert = function(...)
+    local t = {...}
+    local b, reset = 0, nil
+    if type(t[#t]) == "boolean" then b = 1; reset = t[#t] end
+    if type(t[2]) == "number" then for i=3, #t-b do t[1]:cachedInsert(t[2],t[i],reset); if reset and t[i].text then t[i].xScale, t[i].yScale=.5,.5 end end
+    else for i=2, #t-b do t[1]:cachedInsert(t[i],reset); if reset and t[i].text then t[i].xScale, t[i].yScale=.5,.5 end end
+    end
+end
+cache.newGroup = display.newGroup
+display.newGroup = function(...)
+    local g = cache.newGroup(...)
+    g.cachedInsert = g.insert
+    g.insert = crawlspaceInsert
+    displayMethods( g )
+    return g
 end

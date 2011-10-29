@@ -62,23 +62,46 @@ local u = {}
 u.u = u
 setmetatable(_G, {__index = u})
 
-u.initFont = function( one, two)
-end
-
-display.newParagraph = function()
-    return {}
-end
-
 u.simulator = true
 u.VERBOSE = true
 u.cache = {}
 u.helpArr = {}
 
+-- already here
 require 'lua.core.comm'
 require 'lua.core.data'
 require 'lua.core.string'
 require 'lua.core.featurelist'
 require 'lua.core.misc'
+
+-- I added from beta branch
+require "lua.util.contentscale"
+require "lua.display.displayobjects"
+require "lua.display.referencepoints"
+require "lua.display.newgroup"
+require "lua.display.newcircle"
+require "lua.display.newrect"
+require "lua.display.newroundedrect"
+require "lua.display.newimage"
+require "lua.display.newimagerect"
+require "lua.display.sprite"
+require "lua.display.retinatext"
+require "lua.display.newparagraph"
+require "lua.timer.timer"
+require "lua.timer.safetimer"
+require "lua.util.transitions"
+require "lua.util.musiccrossfade"
+require "lua.util.sfx"
+require "lua.util.safewebpopups"
+require "lua.util.fonts"
+require "lua.util.crossplatformfilename"
+require "lua.util.internet"
+require "lua.core.table"
+require "lua.util.print"
+require "lua.util.beta"
+
+-- couldn't find in either
+require "lua.core.tips"
 
 u.help = function(item)
     local print = u.cache.print or print
@@ -170,8 +193,7 @@ end
 
 u.override = function(...)
     if initializing and not initialized then
-        local arg = {...}
-        if not arg[1] or arg[1] == 'all' then
+        local arg = {...}        if not arg[1] or arg[1] == 'all' then
             Banner('Overriding everything')
             for key, _ in pairs(overrideMappings) do
                 override(key)

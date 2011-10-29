@@ -11,15 +11,13 @@ popup. Now you won't need to build and install  to set it's position.
 
 ]]
 
-return function(CSL, private, cache)
-	cache.showWebPopup, cache.cancelWebPopup = native.showWebPopup, native.cancelWebPopup
-	local curPopup
-	native.showWebPopup = function( x, y, w, h, url, params )
-		if not simulator then cache.showWebPopup(x, y, w, h, url, params)
-		else curPopup = display.newRect(x, y, w, h); curPopup:setFillColor( 100, 100, 100 ) end
-	end
-	
-	native.cancelWebPopup = function()
-		if curPopup and curPopup.removeSelf then display.remove(curPopup) else cache.cancelWebPopup() end
-	end
+cache.showWebPopup, cache.cancelWebPopup = native.showWebPopup, native.cancelWebPopup
+local curPopup
+native.showWebPopup = function( x, y, w, h, url, params )
+    if not simulator then cache.showWebPopup(x, y, w, h, url, params)
+    else curPopup = display.newRect(x, y, w, h); curPopup:setFillColor( 100, 100, 100 ) end
+end
+
+native.cancelWebPopup = function()
+    if curPopup and curPopup.removeSelf then display.remove(curPopup) else cache.cancelWebPopup() end
 end
