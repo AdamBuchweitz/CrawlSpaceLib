@@ -1,0 +1,1 @@
+context("print", function() end)

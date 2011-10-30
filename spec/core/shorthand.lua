@@ -1,0 +1,1 @@
+context("shorthand", function() end)
