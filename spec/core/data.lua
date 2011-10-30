@@ -1,1 +1,6 @@
-context("data", function() end)
+context("data", function() 
+	assert(type(Save)     == 'function', "Save() should be a function")
+	assert(type(Load)     == 'function', "Load() should be a function")
+	assert(type(Defaults) == 'function', "Defaults() should be a function")
+	assert(type(setVar)   == 'function', "setVar() should be a function")
+end)

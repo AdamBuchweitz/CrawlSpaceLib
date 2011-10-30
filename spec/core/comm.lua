@@ -1,1 +1,3 @@
-context("comm", function() end)
+context("comm", function() 
+	assert(true, "no tests")
+end)
