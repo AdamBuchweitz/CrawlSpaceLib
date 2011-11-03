@@ -696,7 +696,7 @@ available properties are:
 font       = myCustomFont
 lineHeight = 1.4
 align      = ["left", "right", "center"]
-textColor  = 255, 0, 0
+textColor  = { 255, 0, 0 }
 
 The method returns a group, which cannot be directly editted (yet),
 but can be handled like any other group. You may position it,
