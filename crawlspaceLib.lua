@@ -237,7 +237,7 @@ Load = function(fileName)
                 if pair[2] == "true" then pair[2] = true
                 elseif pair[2] == "false" then pair[2] = false
                 elseif tonum(pair[2]) then pair[2] = tonum(pair[2]) end
-                dataTableNew[pair[1]] = pair[2]
+                dataTableNew[tonum(pair[1]) or pair[1]] = pair[2]
             end
         end
 
