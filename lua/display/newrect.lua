@@ -25,3 +25,5 @@ u.display.newRect = function( parent, x, y, w, h, rp )
     parent, x, y, w, h, rp = nil, nil, nil, nil, nil, nil
     return r
 end
+
+if not u.NOCONFLICT then display.newRect = u.display.newRect end

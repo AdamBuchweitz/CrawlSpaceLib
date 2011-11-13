@@ -22,3 +22,5 @@ end
 u.native.cancelWebPopup = function()
     if curPopup and curPopup.removeSelf then display.remove(curPopup) else u.cache.cancelWebPopup() end
 end
+
+if not u.NOCONFLICT then native.showWebPopup, native.cancelWebPopup = u.native.showWebPopup, u.native.cancelWebPopup end

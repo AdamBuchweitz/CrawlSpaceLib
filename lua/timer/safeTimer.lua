@@ -27,3 +27,5 @@ u.timer.cancel = function(t)
         timerCancel(t)
     end
 end
+
+if not u.NOCONFLICT then timer.cancel = u.timer.cancel end

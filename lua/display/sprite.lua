@@ -20,3 +20,5 @@ u.sprite.newSprite = function( spriteSet, rp )
     if luau.referencePoints( s, rp ) then luau.displayMethods( s ) end
     return s
 end
+
+if not u.NOCONFLICT then sprite.newSprite = u.sprite.newSprite end

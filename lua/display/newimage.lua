@@ -28,3 +28,5 @@ u.display.newImage = function( parent, path, x, y, rp )
     local parent, path, x, y, rp = nil, nil, nil, nil, nil
     return i
 end
+
+if not u.NOCONFLICT then display.newImage = u.display.newImage end

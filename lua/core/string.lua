@@ -35,3 +35,5 @@ local split = function(string, pattern)
     return table
 end
 u.string.split = split
+
+if not u.NOCONFLICT then string.split = u.string.split end

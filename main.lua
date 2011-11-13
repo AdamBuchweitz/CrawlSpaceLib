@@ -4,8 +4,6 @@
 require 'lua.u'
 
 local luau = extend()
-luau.print("test")
---override()
 
             --[[ ########## Init Font Demo ########## ]]--
 

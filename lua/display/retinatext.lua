@@ -65,3 +65,5 @@ u.display.newText = function( parent, text, xPos, yPos, width, height, font, siz
     parent, text, xPos, yPos, font, size, rp = nil, nil, nil, nil, nil, nil
     return t
 end
+
+if not u.NOCONFLICT then display.newText = u.display.newText end

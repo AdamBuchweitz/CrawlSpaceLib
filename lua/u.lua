@@ -63,7 +63,7 @@ u.u = u
 
 u.simulator = true
 u.VERBOSE = true
-u.NOCONFLICT = false
+u.NOCONFLICT = true
 u.cache = {}
 u.helpArr = {}
 
@@ -76,7 +76,7 @@ require 'lua.core.string'
 require 'lua.core.featurelist'
 require 'lua.core.misc'
 
---setmetatable(_G, cachemt)
+setmetatable(_G, cachemt)
 
 u.help = function(item)
     local print = u.cache.print or print
@@ -161,9 +161,11 @@ _G.extend = function(...)
             extend(arg[1])
         end
     end
-    setmetatable(_G, cachemt)
+    if u.NOCONFLICT then setmetatable(_G, cachemt) end
     return u
 end
+
+--[[ temporarily disabled
 
 local overrideMappings = {
     timer = 'lua.timer.safeTimer',
@@ -201,3 +203,4 @@ _G.override = function(...)
         end
     end
 end
+--]]

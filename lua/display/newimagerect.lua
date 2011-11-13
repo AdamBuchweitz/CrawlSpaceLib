@@ -38,3 +38,5 @@ u.display.newImageRect = function( parent, path, baseDir, w, h, rp )
     local parent, path, baseDir, w, h, rp  = nil, nil, nil, nil, nil, nil
     return i
 end
+
+if not u.NOCONFLICT then display.newImageRect = u.display.newImageRect end

@@ -55,3 +55,5 @@ u.transition.cancel = function(tweens)
         end
     end
 end
+
+if not u.NOCONFLICT then transition.from, transition.to, transition.cancel = u.transition.from, u.transition.to, u.transition.cancel end

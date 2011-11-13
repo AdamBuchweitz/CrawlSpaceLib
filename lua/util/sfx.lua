@@ -43,3 +43,5 @@ u.audio.playSFX = function( snd, params )
     end
     return channel
 end
+
+if not u.NOCONFLICT then audio.playSFX = u.audio.playSFX end

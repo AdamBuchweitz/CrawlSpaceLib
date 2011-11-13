@@ -26,3 +26,5 @@ u.display.newRoundedRect = function( parent, x, y, w, h, r, rp )
     parent, x, y, w, h, rp = nil, nil, nil, nil, nil, nil
     return r
 end
+
+if not u.NOCONFLICT then display.newRoundedRect = u.display.newRoundedRect end

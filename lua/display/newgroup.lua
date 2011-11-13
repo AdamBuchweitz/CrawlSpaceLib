@@ -50,3 +50,5 @@ u.display.newGroup = function(...)
     luau.displayMethods( g )
     return g
 end
+
+if not u.NOCONFLICT then display.newGroup = u.display.newGroup end

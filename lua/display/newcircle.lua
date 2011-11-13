@@ -22,3 +22,5 @@ u.display.newCircle = function( parent, x, y, r, rp )
     c.x, c.y = x, y
     return c
 end
+
+if not u.NOCONFLICT then display.newCircle = u.display.newCircle end

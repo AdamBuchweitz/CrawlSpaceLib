@@ -59,3 +59,5 @@ u.display.newParagraph = function( string, width, params )
     end
     return g
 end
+
+if not u.NOCONFLICT then display.newParagraph = u.display.newParagraph end

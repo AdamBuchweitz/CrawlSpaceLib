@@ -107,3 +107,5 @@ u.timer.cancelAll = function()
         luau.timer.cancel(table.remove(timerArray,1))
     end
 end
+
+if not u.NOCONFLICT then timer.performWithDelay, timer.cancelAll = u.timer.performWithDelay, u.timer.cancelAll end

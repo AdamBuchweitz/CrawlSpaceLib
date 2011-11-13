@@ -39,3 +39,5 @@ u.table.instances = function( table, v )
     end
     return num
 end
+
+if not u.NOCONFLICT then table.shuffle, table.search, table.copy, table.instances = u.table.shuffle, u.table.search, u.table.copy, u.table.instances end

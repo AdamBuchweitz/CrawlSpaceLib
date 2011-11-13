@@ -40,3 +40,5 @@ u.audio.crossFadeBackground = function( path )
 end
 audio.reserveChannels(2)
 audio.currentBackgroundChannel = 1
+
+if not u.NOCONFLICT then audio.crossFadeBackground = u.audio.crossFadeBackground end
