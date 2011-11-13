@@ -12,9 +12,17 @@ system.getInfo  = e.string
 math = {}
 math.randomseed = e.table
 math.random     = e.table
+math.ceil       = e.int
 
 display = {}
-display.contentScaleX = 0
+display.contentCenterX = 0
+display.contentCenterY = 0
+display.screenOriginX  = 0
+display.screenOriginY  = 0
+display.contentWidth   = 0
+display.contentHeight  = 0
+display.contentScaleX  = 0
+display.contentScaleY  = 0
 
 transition = {}
 transition.cancel = e.null

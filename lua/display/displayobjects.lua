@@ -23,33 +23,35 @@ center() method and either pass in "x", "y", or nothing to center both axis'.
 
 :: EXAMPLE 1 ::
 
-    myImage = display.newImage("myImage")
+    myImage = u.display.newImage("myImage")
     myImage:center()
     myImage:fadeIn()
-    timer.performWithDelay( 2000, myImage.fadeOut )
+    u.timer.performWithDelay( 2000, myImage.fadeOut )
 
 :: EXAMPLE 2 ::
 
-    local myRectangle = display.newRect(0,0,100,50)
+    local myRectangle = u.display.newRect(0,0,100,50)
     myRectangle:setPos(25, 25)
 
 ]]
 
+local luau = u
+
 local random, floor, ceil, abs, sqrt, atan2, pi = math.random, math.floor, math.ceil, math.abs, math.sqrt, math.atan2, math.pi
-helpArr.setFillColor = 'myRect:setFillColor( hex )\n\n\tor\n\n\tmyRect:setFillColor( red, green, blue [, alpha] )'
+u.helpArr.setFillColor = 'myRect:setFillColor( hex )\n\n\tor\n\n\tmyRect:setFillColor( red, green, blue [, alpha] )'
 local hexTable = {f=15,e=14,d=13,c=12,b=11,a=10}
-hexToRGB = function(h, format)
+u.hexToRGB = function(h, format)
     local r,g,b,a
     local hex = string.lower(string.gsub(h,"#",""))
     if hex:len() >= 6 then
-        r = tonum(hex:sub(1, 2), 16)
-        g = tonum(hex:sub(3, 4), 16)
-        b = tonum(hex:sub(5, 6), 16)
-        a = tonum(hex:sub(7, 8), 16)
+        r = luau.tonum(hex:sub(1, 2), 16)
+        g = luau.tonum(hex:sub(3, 4), 16)
+        b = luau.tonum(hex:sub(5, 6), 16)
+        a = luau.tonum(hex:sub(7, 8), 16)
     elseif hex:len() == 3 then
-        r = tonum(hex:sub(1, 1) .. hex:sub(1, 1), 16)
-        g = tonum(hex:sub(2, 2) .. hex:sub(2, 2), 16)
-        b = tonum(hex:sub(3, 3) .. hex:sub(3, 3), 16)
+        r = luau.tonum(hex:sub(1, 1) .. hex:sub(1, 1), 16)
+        g = luau.tonum(hex:sub(2, 2) .. hex:sub(2, 2), 16)
+        b = luau.tonum(hex:sub(3, 3) .. hex:sub(3, 3), 16)
         a = 255
     end
     if format == "table" then
@@ -64,14 +66,14 @@ local crawlspaceFillColor = function(self,r,g,b,a)
     if type(r) == "string" then
         local hex = string.lower(string.gsub(r,"#",""))
         if hex:len() >= 6 then
-            r = tonum(hex:sub(1, 2), 16)
-            g = tonum(hex:sub(3, 4), 16)
-            b = tonum(hex:sub(5, 6), 16)
-            a = tonum(hex:sub(7, 8), 16) or 255
+            r = luau.tonum(hex:sub(1, 2), 16)
+            g = luau.tonum(hex:sub(3, 4), 16)
+            b = luau.tonum(hex:sub(5, 6), 16)
+            a = luau.tonum(hex:sub(7, 8), 16) or 255
         elseif hex:len() == 3 then
-            r = tonum(hex:sub(1, 1) .. hex:sub(1, 1), 16)
-            g = tonum(hex:sub(2, 2) .. hex:sub(2, 2), 16)
-            b = tonum(hex:sub(3, 3) .. hex:sub(3, 3), 16)
+            r = luau.tonum(hex:sub(1, 1) .. hex:sub(1, 1), 16)
+            g = luau.tonum(hex:sub(2, 2) .. hex:sub(2, 2), 16)
+            b = luau.tonum(hex:sub(3, 3) .. hex:sub(3, 3), 16)
             a = 255
         end
     end
@@ -79,7 +81,7 @@ local crawlspaceFillColor = function(self,r,g,b,a)
 end
 
 local injectedDisplayMethods = {}
-injectDisplayMethod = function(name, method)
+u.injectDisplayMethod = function(name, method)
     if type(method) ~= "function" then
         error("Please pass a method to inject")
     else
@@ -88,18 +90,18 @@ injectDisplayMethod = function(name, method)
 end
 
 local tranc = transition.cancel
-displayMethods = function( obj )
+u.displayMethods = function( obj )
     local d = obj
     d.distanceTo = function(self,x,y) return ceil(sqrt( ((y - self.y) * (y - self.y)) + ((x - self.x) * (x - self.x)))) end
     d.angleTo = function(self,x,y) return ceil(atan2( (y - self.y), (x - self.x) ) * 180 / pi) + 90 end
-    d.setPos = function(self,x,y) d.x, d.y = screenX+x, screenY+y end
+    d.setPos = function(self,x,y) d.x, d.y = luau.centerY+x, luau.screenY+y end
     d.setScale = function(self,x,y) d.xScale, d.yScale = x, y or x end
     d.setScaleP = d.setScale
     d.setSize = function(self,height,width) d.height, d.width = height, width end
-    d.center = function(self,axis) if axis == "x" then d.x=centerX elseif axis == "y" then d.y=centerY else d.x,d.y=centerX,centerY end end
+    d.center = function(self,axis) if axis == "x" then d.x=luau.centerX elseif axis == "y" then d.y=luau.centerY else d.x,d.y=luau.centerX,luau.centerY end end
     d.fader={}
-    d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
-    d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() display.remove(d) end elseif autoRemove then d.callback = function() callback(); display.remove(d); d=nil end end tranc(d.fader); d.fader=transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
+    d.fadeIn = function( self, num, callback ) tranc(d.fader); d.alpha=0; d.fader=luau.transition.to(d, {alpha=1, time=num or d.fadeTime or 500, onComplete=callback}) end
+    d.fadeOut = function( self, time, callback, autoRemove) d.callback = callback; if type(callback) == "boolean" then d.callback = function() display.remove(d) end elseif autoRemove then d.callback = function() callback(); display.remove(d); d=nil end end tranc(d.fader); d.fader=luau.transition.to(d, {alpha=0, time=time or d.fadeTime or 500, onComplete=d.callback}) end
     d.setStageFocus = function() display.getCurrentStage():setFocus(d) end
     d.removeStageFocus = function() display.getCurrentStage():setFocus(nil) end
     if d.setFillColor then d.cachedFillColor = d.setFillColor; d.setFillColor = crawlspaceFillColor end

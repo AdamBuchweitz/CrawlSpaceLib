@@ -7,9 +7,10 @@
     # Author:       Adam Buchweitz
     #
     # ]]
+    
+local luau = u
 
-local print  = print
-local ceil   = math.ceil
+local ceil  = math.ceil
 
 local bannerTop = '\n\t ######################### Message ######################### '
 local fullLine  = '\n\t #                                                         # '
@@ -24,11 +25,11 @@ local bannerBot = '\n\t ########################################################
     #
     # ]]
 
-Alert = function(message)
+u.Alert = function(message)
     -- Only output if the environment is the simulator,
     -- and the 'VERBOSE' variable is set to 'true'
-    if simulator and VERBOSE then
-        local splitString, lineCache, tempString = string.split(message, " "), {}, ""
+    if luau.simulator and luau.VERBOSE then
+        local splitString, lineCache, tempString = luau.string.split(message, " "), {}, ""
         local messageText = ''
         if #message > 55 then
             for i=1, #splitString do
@@ -59,12 +60,12 @@ end
     #
     # ]]
 
-Banner = function(message)
+u.Banner = function(message)
     -- Only output if the environment is the simulator,
     -- and the 'VERBOSE' variable is set to 'true'
-    if simulator and VERBOSE then
+    if luau.simulator and luau.VERBOSE then
 
-        local splitString, lineCache, tempString = string.split(message, " "), {}, ""
+        local splitString, lineCache, tempString = luau.string.split(message, " "), {}, ""
         local messageText = ''
         if #message > 55 then
             for i=1, #splitString do

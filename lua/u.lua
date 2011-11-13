@@ -46,7 +46,7 @@
 
     Note:
         If your project usees an old version of the Director class by Ricardo Rauber
-        and use timer.cancelAll() you will cancel timers from the
+        and use u.timer.cancelAll() you will cancel timers from the
         director! Either modify your version of the director class,
         or use the one included with this library.
 
@@ -60,48 +60,23 @@
 
 local u = {}
 u.u = u
-setmetatable(_G, {__index = u})
 
 u.simulator = true
 u.VERBOSE = true
+u.NOCONFLICT = false
 u.cache = {}
 u.helpArr = {}
 
--- already here
+local cachemt = getmetatable(_G)
+setmetatable(_G, {__index = u})
+
 require 'lua.core.comm'
 require 'lua.core.data'
 require 'lua.core.string'
 require 'lua.core.featurelist'
 require 'lua.core.misc'
 
--- I added from beta branch
-require "lua.util.contentscale"
-require "lua.display.displayobjects"
-require "lua.display.referencepoints"
-require "lua.display.newgroup"
-require "lua.display.newcircle"
-require "lua.display.newrect"
-require "lua.display.newroundedrect"
-require "lua.display.newimage"
-require "lua.display.newimagerect"
-require "lua.display.sprite"
-require "lua.display.retinatext"
-require "lua.display.newparagraph"
-require "lua.timer.timer"
-require "lua.timer.safetimer"
-require "lua.util.transitions"
-require "lua.util.musiccrossfade"
-require "lua.util.sfx"
-require "lua.util.safewebpopups"
-require "lua.util.fonts"
-require "lua.util.crossplatformfilename"
-require "lua.util.internet"
-require "lua.core.table"
-require "lua.util.print"
-require "lua.util.beta"
-
--- couldn't find in either
-require "lua.core.tips"
+--setmetatable(_G, cachemt)
 
 u.help = function(item)
     local print = u.cache.print or print
@@ -117,63 +92,77 @@ u.help = function(item)
     end
 end
 
-local initMappings = {}
-local initializing = false
-local initialized  = false
-
-u.init = function(func)
-    if not initialized and not initializing then
-        initializing = true
-        func()
-        for i=1,#initMappings,1 do 
-            require(initMappings[i])
-        end
-        initializing = false
-        initialized  = true
-    end
-end
-
 local extendMappings = {
-    table     = 'lua.core.table',
-    shorthand = 'lua.core.shorthand',
-    tips      = 'lua.core.tips',
-    welcome   = 'lua.core.welcome',
-    timer     = 'lua.timer.timer'
+--[[comm                  = 'lua.core.comm',
+    data                  = 'lua.core.data',
+    string                = 'lua.core.string',
+    featurelist           = 'lua.core.featurelist',
+    misc                  = 'lua.core.misc',
+--]]
+    
+    welcome               = 'lua.core.welcome',
+    shorthand             = 'lua.core.shorthand',
+    contentscale          = 'lua.util.contentscale',
+    displayobjects        = 'lua.display.displayobjects',
+    referencepoints       = 'lua.display.referencepoints',
+    newgroup              = 'lua.display.newgroup',
+    newcircle             = 'lua.display.newcircle',
+    newrect               = 'lua.display.newrect',
+    newroundedrect        = 'lua.display.newroundedrect',
+    newimage              = 'lua.display.newimage',
+    newimagerect          = 'lua.display.newimagerect',
+    sprite                = 'lua.display.sprite',
+    retinatext            = 'lua.display.retinatext',
+    newparagraph          = 'lua.display.newparagraph',
+    timer                 = 'lua.timer.timer',
+    safetimer             = 'lua.timer.safetimer',
+    transitions           = 'lua.util.transitions',
+    musiccrossfade        = 'lua.util.musiccrossfade',
+    sfx                   = 'lua.util.sfx',
+    safewebpopups         = 'lua.util.safewebpopups',
+    fonts                 = 'lua.util.fonts',
+    crossplatformfilename = 'lua.util.crossplatformfilename',
+    internet              = 'lua.util.internet',
+    table                 = 'lua.core.table',
+    print                 = 'lua.util.print',
+    beta                  = 'lua.util.beta',
+    
+    tips                  = 'lua.core.tips',
 }
 
 local extend = function(arg)
-    Alert('EXTENDING::'..arg)
+    u.Alert('EXTENDING::'..arg)
     if extendMappings[arg] then
-        --require(extendMappings[arg])
-        initMappings[#initMappings+1] = extendMappings[arg]
+        require(extendMappings[arg])
     else
         error('Not a valid extend')
     end
 end
 
-u.extend = function(...)
-    if initializing and not initialized then
-        local arg = {...}
-        if not arg[1] or arg[1] == 'all' then
-            Banner('Extending everything')
-            for key, _ in pairs(extendMappings) do
-                extend(key)
+_G.extend = function(...)
+    setmetatable(_G, {__index = u})
+    local arg = {...}
+    if not arg[1] or arg[1] == 'all' then
+        u.Banner('Extending everything')
+        for key, _ in pairs(extendMappings) do
+            extend(key)
+        end
+    else
+        u.Banner('Begin Selective Extending')
+        if #arg > 1 then
+            for i=1, #arg do
+                extend(arg[i])
+            end
+        elseif type(arg[1]) == 'table' then
+            for i=1, #arg[1] do
+                extend(arg[1][i])
             end
         else
-            Banner('Begin Selective Extending')
-            if #arg > 1 then
-                for i=1, #arg do
-                    extend(arg[i])
-                end
-            elseif type(arg[1]) == 'table' then
-                for i=1, #arg[1] do
-                    extend(arg[1][i])
-                end
-            else
-                extend(arg[1])
-            end
+            extend(arg[1])
         end
     end
+    setmetatable(_G, cachemt)
+    return u
 end
 
 local overrideMappings = {
@@ -182,35 +171,33 @@ local overrideMappings = {
 }
 
 local override = function(arg)
-    Alert('OVERRIDING:: '..arg)
+    u.Alert('OVERRIDING:: '..arg)
     if overrideMappings[arg] then
-        --require(overrideMappings[arg])
-        initMappings[#initMappings+1] = overrideMappings[arg]
+        require(overrideMappings[arg])
     else
         error('Not a valid override')
     end
 end
 
-u.override = function(...)
-    if initializing and not initialized then
-        local arg = {...}        if not arg[1] or arg[1] == 'all' then
-            Banner('Overriding everything')
-            for key, _ in pairs(overrideMappings) do
-                override(key)
+_G.override = function(...)
+    local arg = {...}
+    if not arg[1] or arg[1] == 'all' then
+        u.Banner('Overriding everything')
+        for key, _ in pairs(overrideMappings) do
+            override(key)
+        end
+    else
+        u.Banner('Begin Selective Override')
+        if #arg > 1 then
+            for i=1, #arg do
+                override(arg[i])
+            end
+        elseif type(arg[1]) == 'table' then
+            for i=1, #arg[1] do
+                override(arg[1][i])
             end
         else
-            Banner('Begin Selective Override')
-            if #arg > 1 then
-                for i=1, #arg do
-                    override(arg[i])
-                end
-            elseif type(arg[1]) == 'table' then
-                for i=1, #arg[1] do
-                    override(arg[1][i])
-                end
-            else
-                override(arg[1])
-            end
+            override(arg[1])
         end
     end
 end

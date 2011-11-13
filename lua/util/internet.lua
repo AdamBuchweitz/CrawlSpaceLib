@@ -17,7 +17,7 @@ so access it during the first few seconds of launch.
 :: EXAMPLE 1 ::
 
     local myFunction = function(
-        print("I haz interwebz!")
+        u.print("I haz interwebz!")
     end
 
     executeIfInternet(myFunction)
@@ -26,36 +26,36 @@ so access it during the first few seconds of launch.
 :: EXAMPLE 2 ::
 
     local myFunction = function()
-        print("I haz interwebz!")
+        u.print("I haz interwebz!")
     end
 
     -- Returns true for internet, false if not, and nil if unkown when called
     local executed = executeIfInternet(myFunction)
 
     if executed == true then
-        print("It executed imidiately")
+        u.print("It executed imidiately")
     elseif executed == false then
-        print("It never executed")
+        u.print("It never executed")
     else
-        print("We don't yet know if it executed")
+        u.print("We don't yet know if it executed")
     end
 
 
 :: EXAMPLE 3 ::
 
     local myInternetFunction = function()
-        print("I haz interwebz!")
+        u.print("I haz interwebz!")
     end
 
     local myNonInternetFunction = function()
-        print("Internet fail")
+        u.print("Internet fail")
     end
 
     executeIfInternet(myInternetFunction, myNonInternetFunction)
 
 ]]
 
-helpArr.executeIfInternet = 'executeIfInternet(myInternetMethod, myNonInternetMethod)'
+u.helpArr.executeIfInternet = 'executeIfInternet(myInternetMethod, myNonInternetMethod)'
 local onInternet = {}
 local checkForInternet
 local executeOnNet = function(bool)
@@ -78,7 +78,7 @@ checkForInternet = function()
 end
 checkForInternet()
 
-executeIfInternet = function(y, n)
+u.executeIfInternet = function(y, n)
     if internet then y(); return true
     elseif internet == false then n(); return false
     elseif internet == nil then onInternet[#onInternet+1] = {y=y, n=n} end

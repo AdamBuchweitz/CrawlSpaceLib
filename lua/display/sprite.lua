@@ -6,13 +6,17 @@ it's reference point.
 
 :: EXAMPLE 1 ::
 
-    sprite.newSprite( mySpriteSet [, "tl"])
+    u.sprite.newSprite( mySpriteSet [, "tl"])
 
 ]]
+
+local luau = u
+
 local sprite = require "sprite"
-cache.newSprite = sprite.newSprite
-sprite.newSprite = function( spriteSet, rp )
-    local s = cache.newSprite( spriteSet )
-    if referencePoints( s, rp ) then displayMethods( s ) end
+u.sprite = sprite
+u.cache.newSprite = sprite.newSprite
+u.sprite.newSprite = function( spriteSet, rp )
+    local s = luau.cache.newSprite( spriteSet )
+    if luau.referencePoints( s, rp ) then luau.displayMethods( s ) end
     return s
 end

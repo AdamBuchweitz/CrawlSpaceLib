@@ -6,18 +6,21 @@ it's reference point.
 
 :: EXAMPLE 1 ::
 
-    display.newRoundedRect( 0, 0, 100, 50, 10 [, "tl"])
+    u.display.newRoundedRect( 0, 0, 100, 50, 10 [, "tl"])
 
 ]]
 
-helpArr.newRoundedRect = 'display.newRoundedRect(x-position, y-position, width, height, radius [, referencePoint])'
-cache.newRoundedRect = display.newRoundedRect
-display.newRoundedRect = function( parent, x, y, w, h, r, rp )
-    local parent, x, y, w, h, r, rp = parent, x, y, w, h, r, rp
-    if tonum(parent) then x, y, w, h, r, rp, parent = parent, x, y, w, h, r, nil end
+local luau = u
 
-    local r = cache.newRoundedRect( 0, 0, w, h, r ); r.x,r.y=x,y
-    if referencePoints( r, rp ) then displayMethods( r ) end
+u.helpArr.newRoundedRect = 'display.newRoundedRect(x-position, y-position, width, height, radius [, referencePoint])'
+u.cache.newRoundedRect = display.newRoundedRect
+u.display = u.display or display
+u.display.newRoundedRect = function( parent, x, y, w, h, r, rp )
+    local parent, x, y, w, h, r, rp = parent, x, y, w, h, r, rp
+    if luau.tonum(parent) then x, y, w, h, r, rp, parent = parent, x, y, w, h, r, nil end
+
+    local r = luau.cache.newRoundedRect( 0, 0, w, h, r ); r.x,r.y=x,y
+    if luau.referencePoints( r, rp ) then luau.displayMethods( r ) end
     if parent then parent:insert(r) end
     r.x, r.y = x, y
     parent, x, y, w, h, rp = nil, nil, nil, nil, nil, nil

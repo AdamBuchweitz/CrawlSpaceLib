@@ -49,8 +49,8 @@ local Data     = {}
     #
     #]]
 
-helpArr.Save = 'Save(table [, filename])'
-helpArr.save = 'Did you mean "Save" ?'
+u.helpArr.Save = 'Save(table [, filename])'
+u.helpArr.save = 'Did you mean "Save" ?'
 u.Save = function(table, fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "w" )
@@ -77,8 +77,8 @@ end
     #
     #]]
 
-helpArr.Load = 'local mySavedData = Load([filename])'
-helpArr.load = 'Did you mean "Load"?'
+u.helpArr.Load = 'local mySavedData = Load([filename])'
+u.helpArr.load = 'Did you mean "Load"?'
 u.Load = function(fileName)
     local filePath = system.pathForFile( fileName or "data.txt", system.DocumentsDirectory )
     local file = io.open( filePath, "r" )
@@ -94,14 +94,14 @@ u.Load = function(fileName)
                 local pair = split(table[2], "=")
                 if pair[2] == "true" then pair[2] = true
                 elseif pair[2] == "false" then pair[2] = false
-                elseif tonum(pair[2]) then pair[2] = tonum(pair[2]) end
-                if not dataTableNew[tonum(table[1]) or table[1]] then dataTableNew[tonum(table[1]) or table[1]] = {} end
-                dataTableNew[tonum(table[1]) or table[1]][tonum(pair[1]) or pair[1]] = pair[2]
+                elseif u.tonum(pair[2]) then pair[2] = u.tonum(pair[2]) end
+                if not dataTableNew[u.tonum(table[1]) or table[1]] then dataTableNew[u.tonum(table[1]) or table[1]] = {} end
+                dataTableNew[u.tonum(table[1]) or table[1]][u.tonum(pair[1]) or pair[1]] = pair[2]
             else
                 local pair = split(v, "=")
                 if pair[2] == "true" then pair[2] = true
                 elseif pair[2] == "false" then pair[2] = false
-                elseif tonum(pair[2]) then pair[2] = tonum(pair[2]) end
+                elseif u.tonum(pair[2]) then pair[2] = u.tonum(pair[2]) end
                 dataTableNew[pair[1]] = pair[2]
             end
         end
@@ -112,7 +112,7 @@ u.Load = function(fileName)
         end
         return dataTableNew
     else
-        print("No data to load yet.")
+        u.print("No data to load yet.")
         return false
     end
 end
@@ -169,7 +169,7 @@ As a side note, Crawl Space Library automatically registers a variable for
 
     setVar{'sfx', false}
 
-    print(getVar('sfx')) <== prints false
+    u.print(getVar('sfx')) <== prints false
 
 :: EXAMPLE 2 ::
 
@@ -178,11 +178,11 @@ As a side note, Crawl Space Library automatically registers a variable for
     setVar{'score', 1}
     setVar{'score', 2} -- Because 'score' is a number, these add rather then set
 
-    print(getVar('score')) <== prints 3
+    u.print(getVar('score')) <== prints 3
 
     setVar{'score', 0, true} -- Setting the last argument to true makes a number set rather than add
 
-    print(getVar('score')) <== prints 0
+    u.print(getVar('score')) <== prints 0
 
 ]]
 
@@ -208,8 +208,8 @@ u.registerBulk = registerBulk
 local retrieveVariable = function(...)
     local name, name2 = ...; name = name2 or name
     local var = registeredVariables[name]
-    if private.tonum(var) then
-        var = private.tonum(var)
+    if private.u.tonum(var) then
+        var = private.u.tonum(var)
     end
     return var
 end

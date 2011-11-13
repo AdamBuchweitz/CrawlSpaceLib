@@ -4,7 +4,7 @@
 Your game probably will have a toggle to turn on and off sound effect,
 but it's a major pain to check the variable everytime you want to
 play one. If you, instead, adjust the auto-registered "sfx" variable,
-audio.playSFX will handle the checking for you. Additionaly, playSFX
+u.audio.playSFX will handle the checking for you. Additionaly, playSFX
 can handle a string or a preloaded sound. If you are playing the sounds
 often, you should still preload it.
 
@@ -26,7 +26,8 @@ often, you should still preload it.
 
 ]]
 
-audio.playSFX = function( snd, params )
+u.audio = u.audio or audio
+u.audio.playSFX = function( snd, params )
     local channel
     if CSL.retrieveVariable("sfx") == true then
         local play = function()
@@ -35,7 +36,7 @@ audio.playSFX = function( snd, params )
             else channel=audio.play(snd, params) end
         end
         if params and params.delay then
-            timer.performWithDelay(params.delay, play, false)
+            u.timer.performWithDelay(params.delay, play, false)
         else
             play()
         end

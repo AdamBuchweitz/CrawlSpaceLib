@@ -13,13 +13,13 @@ name of the file.
 
     or
 
-    print("fonts")
+    u.print("fonts")
 
 ]]
 
-printFonts = function()
+u.printFonts = function()
     local fonts = native.getFontNames()
-    for k,v in pairs(fonts) do print(v) end
+    for k,v in pairs(fonts) do u.print(v) end
 end
 
             --[[ ########## Easy Global Font ########## ]--
@@ -32,8 +32,8 @@ mind clear.
 
     initFont("FlyerLT-BlackCondensed", "flyer")
 
-    display.newText("This will be written in Flyer!", 0, 0, flyer, 36)
+    u.display.newText("This will be written in Flyer!", 0, 0, flyer, 36)
 
 ]]
 
-initFont = function( fontName, globalName ) _G[globalName] = fontName end
+u.initFont = function( fontName, globalName ) _G[globalName] = fontName end

@@ -22,8 +22,9 @@ a slider that changes the volume, do not forget to change the volume variable!
 ]]
 
 local audio  = require "audio"
+u.audio = u.audio or audio
 local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
-audio.crossFadeBackground = function( path )
+u.audio.crossFadeBackground = function( path )
     if CSL.retrieveVariable("music") then
         local musicPath = path or CSL.retrieveVariable("musicPath")
         if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
