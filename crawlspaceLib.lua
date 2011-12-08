@@ -464,6 +464,27 @@ display.newGroup = function(...)
     return g
 end
 
+        --[[ ########## NewLine Override  ########## ]--
+
+As with all display objects, you may append a string argument to set
+it's reference point.
+
+:: EXAMPLE 1 ::
+
+display.newLine(centerX, centerY, centerX + 20, centerY [, "tl"])
+
+]]
+
+cache.newLine = display.newLine
+display.newLine = function( parent, x1, y1, x2, y2, rp )
+    local parent, x1, y1, x2, y2, rp = parent, x1, y1, x2, y2, rp
+    if tonum(parent) then x1, y1, x2, y2, rp = parent, x1, y1, x2, y2 end
+
+    local l = cache.newLine( x1, y1, x2, y2 )
+    if referencePoints( l, rp ) then displayMethods( l ) end
+    return l
+end
+
             --[[ ########## NewCircle Override  ########## ]--
 
 As with all display objects, you may append a string argument to set
