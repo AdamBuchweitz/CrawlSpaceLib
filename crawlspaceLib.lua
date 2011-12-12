@@ -1306,12 +1306,14 @@ table.search = function( table, v )
     end
 end
 
-table.copy = function( table )
-    local t2 = {}
-    for k,v in pairs( table ) do
-        t2[k] = v
+table.copy = function(...)
+    local t = {}
+    for adx, tb in ipairs(arg) do
+        for i = 1, #tb do
+            table.insert(t, tb[i])
+        end
     end
-    return t2
+    return t
 end
 
 table.instances = function( table, v )
