@@ -963,15 +963,16 @@ a slider that changes the volume, do not forget to change the volume variable!
 
 local audio  = require "audio"
 local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
-audio.crossFadeBackground = function( path )
+audio.crossFadeBackground = function( path, params )
     if CSL.retrieveVariable("music") then
+        params = params or {}
         local musicPath = path or CSL.retrieveVariable("musicPath")
         if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
         audio.fadeOut({channel=audioChannel, time=500})
         if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
         audio.setVolume( CSL.retrieveVariable("volume"), {channel=audioChannel})
         curAudio = audio.loadStream( musicPath )
-        audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
+        audio.play(curAudio, {channel=audioChannel, loops=(params.loops or -1), fadein=500, onComplete=(params.onComplete or function()end)})
         prevAudio = curAudio
         currentSong = musicPath
         audio.currentBackgroundChannel = audioChannel
