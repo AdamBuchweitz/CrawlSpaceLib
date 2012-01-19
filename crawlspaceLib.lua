@@ -478,10 +478,12 @@ display.newLine(centerX, centerY, centerX + 20, centerY [, "tl"])
 cache.newLine = display.newLine
 display.newLine = function( parent, x1, y1, x2, y2, rp )
     local parent, x1, y1, x2, y2, rp = parent, x1, y1, x2, y2, rp
-    if tonum(parent) then x1, y1, x2, y2, rp = parent, x1, y1, x2, y2 end
+    if tonum(parent) then x1, y1, x2, y2, rp, parent = parent, x1, y1, x2, y2, nil end
 
-    local l = cache.newLine( x1, y1, x2, y2 )
+    local l = cache.newLine(x1, y1, x2, y2 )
     if referencePoints( l, rp ) then displayMethods( l ) end
+    if parent then parent:insert(l) end
+
     return l
 end
 
@@ -499,10 +501,11 @@ it's reference point.
 cache.newCircle = display.newCircle
 display.newCircle = function( parent, x, y, r, rp )
     local parent, x, y, r, rp = parent, x, y, r, rp
-    if tonum(parent) then x, y, r, rp, parent = parent, x, y, r end
+    if tonum(parent) then x, y, r, rp, parent = parent, x, y, r, nil end
 
     local c = cache.newCircle( 0, 0, r )
     if referencePoints( c, rp ) then displayMethods( c ) end
+    if parent then parent:insert(c) end
     c.x, c.y = x, y
     return c
 end
