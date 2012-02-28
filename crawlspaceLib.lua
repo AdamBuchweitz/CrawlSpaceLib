@@ -720,7 +720,7 @@ available properties are:
 font       = myCustomFont
 lineHeight = 1.4
 align      = ["left", "right", "center"]
-textColor  = { 255, 0, 0 }
+color  = { 255, 0, 0 }
 
 The method returns a group, which cannot be directly editted (yet),
 but can be handled like any other group. You may position it,
@@ -766,7 +766,10 @@ display.newParagraph = function( string, width, params )
     local g, align = display.newGroup(), textAlignments[format.align or "left"]
     for i=1, #lineCache do
         g.text=(g.text or "")..lineCache[i]
-        local t=display.newText(lineCache[i],0,( format.size * ( format.lineHeight or 1 ) ) * i,format.font, format.size, align); if format.textColor then t:setTextColor(format.textColor[1],format.textColor[2],format.textColor[3]) end g:insert(t)
+        local t = display.newText(lineCache[i],0,( format.size * ( format.lineHeight or 1 ) ) * i,format.font, format.size, align)
+        format.color = format.color or format.textColor or {255, 255, 255}
+        t:setTextColor(format.color[1],format.color[2],format.color[3])
+        g:insert(t)
     end
     return g
 end
