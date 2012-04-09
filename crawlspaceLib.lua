@@ -1313,12 +1313,10 @@ table.search = function( table, v )
     end
 end
 
-table.copy = function(...)
+table.copy = function(arg)
     local t = {}
-    for adx, tb in ipairs(arg) do
-        for i = 1, #tb do
-            table.insert(t, tb[i])
-        end
+    for key, value in pairs(arg) do
+        t[key] = value
     end
     return t
 end
