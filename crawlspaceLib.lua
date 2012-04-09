@@ -890,7 +890,7 @@ a kind warning letting you know, but there be no error
 ]]
 
 cache.timerCancel = timer.cancel
-timer.cancel = function(t) if t then cache.timerCancel(t) end end
+timer.cancel = function(t) if t and t._time then cache.timerCancel(t) end end
 
             --[[ ########## Transitions ########## ]--
 
