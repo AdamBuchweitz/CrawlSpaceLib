@@ -12,12 +12,12 @@ and I'll include it here.
 local tipArray = {
     "Local, local, local, local... Always remember to think local",
     "Global is baaaad!",
-    "'print' is your #1 debugging tool",
+    "'u.print' is your #1 debugging tool",
     "Paragraphs can be aligned 'left', 'right', and 'center'.",
     "The full paragraph text is accessible with yourParagraph.text",
-    "Try running .help() for syntax help ( i.e. u.help('executeIfInternet'))",
+    "Try running .help() for syntax help ( i.e. u.help('u.executeIfInternet'))",
     "Do you have a helpful Lua or CoronaSDK tip? Please send it to me and I'll include it in the library!"
 }
-if INTRO then
-    print("\n\nTip:\n\n\t"..tipArray[math.random(#tipArray)])
+if u.INTRO then
+    u.print("\n\nTip:\n\n\t"..tipArray[math.random(#tipArray)])
 end

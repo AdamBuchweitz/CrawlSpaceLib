@@ -1,0 +1,6 @@
+context("data", function() 
+	assert(type(u.Save)     == 'function', "Save() should be a function")
+	assert(type(u.Load)     == 'function', "Load() should be a function")
+	assert(type(u.Defaults) == 'function', "Defaults() should be a function")
+	assert(type(u.setVar)   == 'function', "setVar() should be a function")
+end)

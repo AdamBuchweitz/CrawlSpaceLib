@@ -1,0 +1,1 @@
+context("newimage", function() end)

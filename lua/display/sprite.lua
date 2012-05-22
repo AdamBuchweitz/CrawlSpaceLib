@@ -6,15 +6,19 @@ it's reference point.
 
 :: EXAMPLE 1 ::
 
-    sprite.newSprite( mySpriteSet [, "tl"])
+    u.sprite.newSprite( mySpriteSet [, "tl"])
 
 ]]
-return function(CSL, private, cache)
-	local sprite = require "sprite"
-	cache.newSprite = sprite.newSprite
-	sprite.newSprite = function( spriteSet, rp )
-		local s = cache.newSprite( spriteSet )
-		if private.referencePoints( s, rp ) then private.displayMethods( s ) end
-		return s
-	end
+
+local luau = u
+
+local sprite = require "sprite"
+u.sprite = sprite
+u.cache.newSprite = sprite.newSprite
+u.sprite.newSprite = function( spriteSet, rp )
+    local s = luau.cache.newSprite( spriteSet )
+    if luau.referencePoints( s, rp ) then luau.displayMethods( s ) end
+    return s
 end
+
+if not u.NOCONFLICT then sprite.newSprite = u.sprite.newSprite end

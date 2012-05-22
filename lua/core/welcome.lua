@@ -20,20 +20,20 @@ local welcome = function()
     local lsntr = function ( event )
         if not event.isError then
             local t = event.target
-            t.xScale, t.yScale = scale, scale
-            t.x, t.y = centerX, centerY
+            t.xScale, t.yScale = u.scale, u.scale
+            t.x, t.y = u.centerX, u.centerY
             t.alpha = 0
-            transition.to(t, {time=500, alpha=1})
+            u.transition.to(t, {time=500, alpha=1})
             t.timer = function()
-                transition.to(t, {time=500, alpha=0, onComplete =
+                u.transition.to(t, {time=500, alpha=0, onComplete =
                     function()
                         display.remove(t)
                     end})
             end
-            timer.performWithDelay(2000, t)
+            u.timer.performWithDelay(2000, t)
         end
     end
     display.loadRemoteImage( "http://crawlspacegames.com/images/splash"..device..".png", "GET", lsntr, "splash"..device..".png", system.TemporaryDirectory )
 end
 
-if INTRO then welcome() end
+if u.INTRO then welcome() end

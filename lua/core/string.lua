@@ -10,6 +10,7 @@
     #]]
 
 
+u.string = u.string or string
 local find = string.find
 local sub  = string.sub
 local split = function(string, pattern)
@@ -33,4 +34,6 @@ local split = function(string, pattern)
 
     return table
 end
-string.split = split
+u.string.split = split
+
+if not u.NOCONFLICT then string.split = u.string.split end

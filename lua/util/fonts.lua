@@ -13,17 +13,16 @@ name of the file.
 
     or
 
-    print("fonts")
+    u.print("fonts")
 
 ]]
 
-return function(CSL, private, cache)
-	printFonts = function()
-		local fonts = native.getFontNames()
-		for k,v in pairs(fonts) do print(v) end
-	end
-	
-			--[[ ########## Easy Global Font ########## ]--
+u.printFonts = function()
+    local fonts = native.getFontNames()
+    for k,v in pairs(fonts) do u.print(v) end
+end
+
+            --[[ ########## Easy Global Font ########## ]--
 
 There really isn't anything to this function, it just sets a global
 variable to whatever name you want the font to be. It just keeps the
@@ -31,11 +30,10 @@ mind clear.
 
 :: EXAMPLE 1 ::
 
-	initFont("FlyerLT-BlackCondensed", "flyer")
+    initFont("FlyerLT-BlackCondensed", "flyer")
 
-	display.newText("This will be written in Flyer!", 0, 0, flyer, 36)
+    u.display.newText("This will be written in Flyer!", 0, 0, flyer, 36)
 
 ]]
-	
-	initFont = function( fontName, globalName ) _G[globalName] = fontName end
-end
+
+u.initFont = function( fontName, globalName ) _G[globalName] = fontName end

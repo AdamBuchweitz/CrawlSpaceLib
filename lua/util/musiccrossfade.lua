@@ -21,23 +21,24 @@ a slider that changes the volume, do not forget to change the volume variable!
     audio.crossFadeBackground("myBackgroundMusic")
 ]]
 
-return function(CSL, private, cache)
-	private.audio  = require "audio"
-	local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
-	private.audio.crossFadeBackground = function( path )
-		if CSL.retrieveVariable("music") then
-			local musicPath = path or CSL.retrieveVariable("musicPath")
-			if currentSong == musicPath and private.audio.getVolume{channel=audioChannel} > 0.1 then return false end
-			private.audio.fadeOut({channel=audioChannel, time=500})
-			if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
-			private.audio.setVolume( CSL.retrieveVariable("volume"), {channel=audioChannel})
-			curAudio = private.audio.loadStream( musicPath )
-			private.audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
-			prevAudio = curAudio
-			currentSong = musicPath
-			private.audio.currentBackgroundChannel = audioChannel
-		end
-	end
-	private.audio.reserveChannels(2)
-	private.audio.currentBackgroundChannel = 1
+local audio  = require "audio"
+u.audio = u.audio or audio
+local audioChannel, otherAudioChannel, currentSong, curAudio, prevAudio = 1
+u.audio.crossFadeBackground = function( path )
+    if CSL.retrieveVariable("music") then
+        local musicPath = path or CSL.retrieveVariable("musicPath")
+        if currentSong == musicPath and audio.getVolume{channel=audioChannel} > 0.1 then return false end
+        audio.fadeOut({channel=audioChannel, time=500})
+        if audioChannel==1 then audioChannel,otherAudioChannel=2,1 else audioChannel,otherAudioChannel=1,2 end
+        audio.setVolume( CSL.retrieveVariable("volume"), {channel=audioChannel})
+        curAudio = audio.loadStream( musicPath )
+        audio.play(curAudio, {channel=audioChannel, loops=-1, fadein=500})
+        prevAudio = curAudio
+        currentSong = musicPath
+        audio.currentBackgroundChannel = audioChannel
+    end
 end
+audio.reserveChannels(2)
+audio.currentBackgroundChannel = 1
+
+if not u.NOCONFLICT then audio.crossFadeBackground = u.audio.crossFadeBackground end

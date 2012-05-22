@@ -1,0 +1,1 @@
+context("newimagerect", function() end)

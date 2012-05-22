@@ -24,20 +24,20 @@ random(); random(); random()
 
 --[[### Platform ###]--
     #
-    # Summary:      Sets up the platform table, which holds the name
-    #               of the platform, but true values for android, ios,
+    # Summary:      Sets up the u.platform table, which holds the name
+    #               of the u.platform, but true values for android, ios,
     #               win, and mac.
     # Parameters:   None
     # Returns:      Nothing
     #
     # ]]
 
-platform = {}
+u.platform = {}
 
 local name = string.lower(system.getInfo("platformName"))
-if name     == "android"   then platform.android = true
-elseif name == "iphone os" then platform.ios     = true
-elseif name == "win"       then platform.win     = true
-elseif name == "mac os x"  then platform.mac     = true end
+if name     == "android"   then u.platform.android = true
+elseif name == "iphone os" then u.platform.ios     = true
+elseif name == "win"       then u.platform.win     = true
+elseif name == "mac os x"  then u.platform.mac     = true end
 
-platform.name = name
+u.platform.name = name

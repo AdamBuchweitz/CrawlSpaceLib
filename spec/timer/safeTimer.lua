@@ -1,0 +1,1 @@
+context("safeTimer", function() end)

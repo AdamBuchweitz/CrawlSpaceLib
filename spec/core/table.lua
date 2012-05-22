@@ -1,0 +1,1 @@
+context("table", function() end)

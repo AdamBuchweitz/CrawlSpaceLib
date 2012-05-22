@@ -46,7 +46,7 @@
 
     Note:
         If your project usees an old version of the Director class by Ricardo Rauber
-        and use timer.cancelAll() you will cancel timers from the
+        and use u.timer.cancelAll() you will cancel timers from the
         director! Either modify your version of the director class,
         or use the one included with this library.
 
@@ -60,24 +60,23 @@
 
 local u = {}
 u.u = u
-setmetatable(_G, {__index = u})
 
-u.initFont = function( one, two)
-end
-
-display.newParagraph = function()
-    return {}
-end
-
-simulator = true
+u.simulator = true
+u.VERBOSE = true
+u.NOCONFLICT = true
 u.cache = {}
 u.helpArr = {}
+
+local cachemt = getmetatable(_G)
+setmetatable(_G, {__index = u})
 
 require 'lua.core.comm'
 require 'lua.core.data'
 require 'lua.core.string'
 require 'lua.core.featurelist'
 require 'lua.core.misc'
+
+setmetatable(_G, cachemt)
 
 u.help = function(item)
     local print = u.cache.print or print
@@ -94,15 +93,45 @@ u.help = function(item)
 end
 
 local extendMappings = {
-    table     = 'lua.core.table',
-    shorthand = 'lua.core.shorthand',
-    tips      = 'lua.core.tips',
-    welcome   = 'lua.core.welcome',
-    timer     = 'lua.timer.timer'
+--[[comm                  = 'lua.core.comm',
+    data                  = 'lua.core.data',
+    string                = 'lua.core.string',
+    featurelist           = 'lua.core.featurelist',
+    misc                  = 'lua.core.misc',
+--]]
+    
+    welcome               = 'lua.core.welcome',
+    shorthand             = 'lua.core.shorthand',
+    contentscale          = 'lua.util.contentscale',
+    displayobjects        = 'lua.display.displayobjects',
+    referencepoints       = 'lua.display.referencepoints',
+    newgroup              = 'lua.display.newgroup',
+    newcircle             = 'lua.display.newcircle',
+    newrect               = 'lua.display.newrect',
+    newroundedrect        = 'lua.display.newroundedrect',
+    newimage              = 'lua.display.newimage',
+    newimagerect          = 'lua.display.newimagerect',
+    sprite                = 'lua.display.sprite',
+    retinatext            = 'lua.display.retinatext',
+    newparagraph          = 'lua.display.newparagraph',
+    timer                 = 'lua.timer.timer',
+    safetimer             = 'lua.timer.safetimer',
+    transitions           = 'lua.util.transitions',
+    musiccrossfade        = 'lua.util.musiccrossfade',
+    sfx                   = 'lua.util.sfx',
+    safewebpopups         = 'lua.util.safewebpopups',
+    fonts                 = 'lua.util.fonts',
+    crossplatformfilename = 'lua.util.crossplatformfilename',
+    internet              = 'lua.util.internet',
+    table                 = 'lua.core.table',
+    print                 = 'lua.util.print',
+    beta                  = 'lua.util.beta',
+    
+    tips                  = 'lua.core.tips',
 }
 
 local extend = function(arg)
-    Alert('EXTENDING::'..arg)
+    u.Alert('EXTENDING::'..arg)
     if extendMappings[arg] then
         require(extendMappings[arg])
     else
@@ -110,15 +139,16 @@ local extend = function(arg)
     end
 end
 
-u.extend = function(...)
+_G.extend = function(...)
+    setmetatable(_G, {__index = u})
     local arg = {...}
     if not arg[1] or arg[1] == 'all' then
-        Banner('Extending everything')
+        u.Banner('Extending everything')
         for key, _ in pairs(extendMappings) do
             extend(key)
         end
     else
-        Banner('Begin Selective Extending')
+        u.Banner('Begin Selective Extending')
         if #arg > 1 then
             for i=1, #arg do
                 extend(arg[i])
@@ -131,7 +161,11 @@ u.extend = function(...)
             extend(arg[1])
         end
     end
+    if u.NOCONFLICT then setmetatable(_G, cachemt) end
+    return u
 end
+
+--[[ temporarily disabled
 
 local overrideMappings = {
     timer = 'lua.timer.safeTimer',
@@ -139,7 +173,7 @@ local overrideMappings = {
 }
 
 local override = function(arg)
-    Alert('OVERRIDING:: '..arg)
+    u.Alert('OVERRIDING:: '..arg)
     if overrideMappings[arg] then
         require(overrideMappings[arg])
     else
@@ -147,15 +181,15 @@ local override = function(arg)
     end
 end
 
-u.override = function(...)
+_G.override = function(...)
     local arg = {...}
     if not arg[1] or arg[1] == 'all' then
-        Banner('Overriding everything')
+        u.Banner('Overriding everything')
         for key, _ in pairs(overrideMappings) do
             override(key)
         end
     else
-        Banner('Begin Selective Override')
+        u.Banner('Begin Selective Override')
         if #arg > 1 then
             for i=1, #arg do
                 override(arg[i])
@@ -169,3 +203,4 @@ u.override = function(...)
         end
     end
 end
+--]]
